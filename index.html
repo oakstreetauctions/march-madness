@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oak Street Auctions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eef0f3;--fg:#0a0a0a;--card:#fff;--line:#cdd2da;--mut:#5b6472;--blue:#009cde;--acc:#0a4c8f;--body:"Barlow Condensed","Arial Narrow",system-ui,sans-serif}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#090b0e;--fg:#f2f4f7;--card:#14181d;--line:#2a3039;--mut:#9aa3af;--acc:#009cde}}
+:root[data-theme="dark"]{--bg:#090b0e;--fg:#f2f4f7;--card:#14181d;--line:#2a3039;--mut:#9aa3af;--acc:#009cde}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:500 16px/1.3 var(--body)}
+.wrap{max-width:1100px;margin:0 auto;padding:12px}
+.hero{position:relative;overflow:hidden;background:#000;color:#fff;border-radius:14px;padding:16px 18px 14px 24px;border:3px solid #8a9099;margin-bottom:12px}
+.hero:before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--blue)}
+.hero:after{content:"";position:absolute;right:0;top:0;bottom:0;width:120px;background:repeating-linear-gradient(115deg,transparent 0 12px,#009cde 12px 16px,transparent 16px 24px,#8a9099 24px 26px,transparent 26px 38px);pointer-events:none}
+.eye{font:700 13px var(--body);letter-spacing:.22em;color:#aeb4bd}
+h1{position:relative;margin:2px 0 4px;font:italic 800 40px/1 var(--body);text-transform:uppercase;letter-spacing:.01em}
+h1 span{color:var(--blue)}
+.sub{color:var(--mut);font-size:14px;margin-bottom:8px}
+.hero .sub{color:#c3c8d0;margin:0;position:relative;max-width:calc(100% - 100px)}
+.stats{display:flex;gap:8px;margin-bottom:10px}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:10px;padding:8px 10px}
+.stat b{display:block;font:italic 800 28px/1.1 var(--body);color:var(--acc)}
+.stat span{color:var(--mut);font:700 12px var(--body);text-transform:uppercase;letter-spacing:.08em}
+.bar{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch}
+.chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:5px 12px 5px 6px;font-size:15px;line-height:1.1;cursor:pointer;color:var(--fg)}
+.chip i{min-width:42px;height:30px;padding:0 6px;border-radius:8px;display:grid;place-items:center;font:800 17px var(--body);letter-spacing:.04em;font-style:normal}
+.chip small{color:var(--mut);font-size:13px}
+.chip.on{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,156,222,.3)}
+.detail{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;padding:10px;margin:6px 0;font-size:15px}
+.detail div{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.dt{border-radius:6px;padding:3px 8px;font-weight:700}
+.ctl{flex-wrap:wrap;display:flex;gap:8px;align-items:center;justify-content:space-between;margin:8px 0;font-size:14px;color:var(--mut)}
+.ctl input{accent-color:var(--blue);width:16px;height:16px;vertical-align:-3px}
+select{font:inherit;padding:5px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}
+.tab{flex:1 0 auto;padding:9px 16px;border-radius:8px;border:2px solid var(--line);background:var(--card);color:var(--fg);font:italic 800 16px var(--body);text-transform:uppercase;letter-spacing:.06em;cursor:pointer}
+.tab.on{background:var(--blue);border-color:var(--blue);color:#000}
+.bracket{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch}
+.col{flex:0 0 180px;display:flex;flex-direction:column}
+.col h4{margin:0 0 6px;padding-bottom:3px;border-bottom:2px solid var(--blue);font:italic 800 13px var(--body);text-transform:uppercase;letter-spacing:.1em;color:var(--acc);text-align:center}
+.games{flex:1;display:flex;flex-direction:column}
+.g{flex:1;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:4px;margin:1px 0;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:0 2px 6px rgba(0,0,0,.12);min-height:98px}
+.slot{display:flex;align-items:center;gap:5px;height:42px;padding:0 7px;border-radius:6px;font-size:16px;font-weight:700;white-space:nowrap}
+.slot i{font-style:normal;font-size:12px;opacity:.85;width:16px;text-align:right}
+.slot span{flex:1;overflow:hidden;text-overflow:ellipsis}
+.slot b{font-size:17px;font-weight:800;line-height:1;letter-spacing:.03em;border-radius:5px;padding:4px 7px;background:rgba(0,0,0,.3);color:#fff}
+.slot.p1{background:#fff;color:#111;padding:0 7px 0 0;gap:6px;overflow:hidden;border:1px solid #cfd4dc}
+.slot.p1 b{align-self:stretch;display:grid;place-items:center;width:56px;border-radius:0;font-size:18px;padding:0;flex:none}
+.slot.out{opacity:.35;text-decoration:line-through}
+.slot.fade{opacity:.15}
+.slot.tbd{background:transparent;border:1px dashed var(--line);color:var(--mut);justify-content:center;font-weight:500;letter-spacing:.1em}
+@media(min-width:700px){.col{flex-basis:200px}h1{font-size:48px}}
+</style></head>
+<body><div class="wrap">
+<div class="hero"><div class="eye">THE BIG DANCE</div><h1>Oak Street <span>Auctions</span></h1><div class="sub" id="st"></div></div>
+<div class="stats" id="stats"></div>
+<div class="bar" id="bar"></div>
+<div id="detail"></div>
+<div class="ctl"><label><input type="checkbox" id="t3"> 3-letter tags</label><span id="demo">Demo results through <select id="rd"><option value="0">Start</option><option value="1">Round of 64</option><option value="2">Round of 32</option><option value="3" selected>Sweet 16</option><option value="4">Elite Eight</option><option value="5">Final Four</option><option value="6">Championship</option></select></span></div>
+<div class="tabs" id="tabs"></div>
+<div class="bracket" id="br"></div>
+</div>
+<script>
+/* ===== SETUP: paste your Google Sheet "Publish to web" CSV links (File > Share > Publish to web > pick tab > CSV) =====
+   teams   : tab with columns Team, Region, Seed, Owner, Bid, Wins   (header names are matched loosely)
+   bidders : OPTIONAL tab with columns Name, Tag (up to 3 letters), Color (#hex)
+   Leave teams "" to see demo data. */
+const CFG={teams:"",bidders:"",refreshSec:60,
+  pay:[0.5,1.5,3,4.5,4.5,9]}; // % of total pot paid to the owner for each win: R64, R32, Sweet 16, Elite 8, Final Four, Title
+const PAL=["#fe928d","#d2e500","#43f1ea","#e2aaf6","#e00219","#b2d886","#09aeef","#fe18b4","#723f03","#07fc4e","#0b45a5","#83285b","#f39e1e","#04581e","#9e07da","#aaffc3","#e6beff","#ffd8b1","#fffac8","#a9a9a9"];
+const SEEDS=[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15];
+const fgOf=c=>{const L=[1,3,5].map(i=>{const v=parseInt(c.slice(i,i+2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,k)=>a+v*[.2126,.7152,.0722][k],0);return(L+.05)/.05>1.05/(L+.05)?"#000":"#fff"};
+let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,T3=false;
+const $=id=>document.getElementById(id);
+const csv=t=>{const o=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){r.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&t[i+1]=="\n")i++;r.push(f);o.push(r);r=[];f=""}else f+=c}if(f||r.length){r.push(f);o.push(r)}return o.filter(r=>r.some(x=>x.trim()))};
+const SFX={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"};
+const prs=n=>{n=n.trim();const m=n.match(/^([A-Za-z'\- ]+?)\.\s*([A-Za-z])\.?$/);let f,w;if(m){f=m[2];w=m[1].trim().split(/\s+/)}else{const p=n.split(/\s+/);f=p[0][0];w=[p[p.length-1]]}
+let sx="";if(w.length>1&&SFX[w[w.length-1].toUpperCase()])sx=w.pop().toUpperCase();return{f:f.toUpperCase(),l:w.join(" "),sx}};
+const cap=s=>s.toLowerCase().replace(/(^|[\s'-])\w/g,c=>c.toUpperCase());
+const disp=n=>{if(!/\.\s*[A-Za-z]\.?$/.test(n.trim()))return n.trim();const p=prs(n);return p.f+". "+cap(p.l)+(p.sx?" "+(/^[IV]+$/.test(p.sx)?p.sx:cap(p.sx)):"")};
+const auto=(n,three)=>{const p=prs(n),l=p.l.replace(/[^A-Za-z]/g,"").toUpperCase();return three?p.f+(p.sx?l[0]+SFX[p.sx]:l.slice(0,2)):p.f+l[0]};
+function mkBid(extra){const m=new Map();(extra||[]).forEach(x=>m.set(x.n,x));DATA.teams.forEach(t=>{if(t.own&&!m.has(t.own))m.set(t.own,{n:t.own})});
+BID=[...m.values()].map(x=>Object.assign({},x));const two=BID.map(x=>auto(x.n,0)),cnt={};two.forEach(k=>cnt[k]=(cnt[k]||0)+1);
+BID.forEach((x,i)=>{x.d=disp(x.n);x.tag=(x.tag||(T3||cnt[two[i]]>1?auto(x.n,1):two[i])).toUpperCase().slice(0,3);if(!/^#[0-9a-f]{6}$/i.test(x.c||""))x.c=PAL[i%PAL.length];x.fg=fgOf(x.c)});
+DATA.teams.forEach(t=>t.b=BID.findIndex(x=>x.n===t.own))}
+function demo(){let s=7;const rnd=()=>{s=(s+0x6D2B79F5)|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const REG=[["South","Auburn,Alabama St,Louisville,Creighton,Michigan,UC San Diego,Texas A&M,Yale,Ole Miss,North Carolina,Iowa St,Lipscomb,Marquette,New Mexico,Michigan St,Bryant",[[0,1,0,0,0,0,1,0],[0,0,0,1],[0,1],[0]]],
+["West","Florida,Norfolk St,UConn,Oklahoma,Memphis,Colorado St,Maryland,Grand Canyon,Missouri,Drake,Texas Tech,UNC Wilmington,Kansas,Arkansas,St. John's,Omaha",[[0,0,1,0,1,0,1,0],[0,1,1,1],[0,0],[0]]],
+["East","Duke,Mt. St. Mary's,Mississippi St,Baylor,Oregon,Liberty,Arizona,Akron,BYU,VCU,Wisconsin,Montana,Saint Mary's,Vanderbilt,Alabama,Robert Morris",[[0,1,0,0,0,0,0,0],[0,1,0,1],[0,1],[0]]],
+["Midwest","Houston,SIUE,Gonzaga,Georgia,Clemson,McNeese,Purdue,High Point,Illinois,Xavier,Kentucky,Troy,UCLA,Utah St,Tennessee,Wofford",[[0,0,1,0,0,0,0,0],[0,1,0,1],[0,1],[0]]]];
+const ts=[];REG.forEach(([reg,nm,picks])=>{const lv=[nm.split(",").map((n,i)=>({n,reg,s:SEEDS[i],w:0}))];ts.push(...lv[0]);picks.forEach((p,k)=>{lv.push(p.map((x,i)=>lv[k][2*i+x]));lv[k+1].forEach(t=>t.w++)})});
+["Florida","Houston","Florida"].forEach(n=>ts.find(t=>t.n===n).w++);
+const SP={"BOHNERT. J":660,"BOYD III. B":298,"BOYD IV. B":0,"BOYD. D":0,"BRADBURY. D":628,"FIDLER. J":187,"FLATH. H":400,"FOUGEROUSSE. D":45,"FRENCH. C":573,"HOUSE. C":112,"KAISER. K":320,"MILLER. J":61,"STONE. J":157,"WILLIAMS. K":190,"WYNDHAM. R":260},nm=Object.keys(SP),sn=nm.filter(n=>SP[n]>0),st=sn.reduce((a,n)=>a+SP[n],0);
+const cn=sn.map(n=>Math.max(1,Math.round(SP[n]/st*64)));for(let d=64-cn.reduce((a,b)=>a+b,0),i=0;d;i=(i+1)%cn.length){const e=d>0?1:-1;if(cn[i]+e>=1){cn[i]+=e;d-=e}}
+const ow=sn.flatMap((n,i)=>Array(cn[i]).fill(n)),o=ts.map((_,i)=>i);for(let i=o.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[o[i],o[j]]=[o[j],o[i]]}
+o.forEach((ti,k)=>ts[ti].own=ow[k]);const by={};ts.forEach(t=>(by[t.own]=by[t.own]||[]).push(t));
+Object.entries(by).forEach(([n,a])=>{a.forEach(t=>t.wt=230/Math.pow(t.s,.95)*(.7+rnd()*.6));const sw=a.reduce((x,t)=>x+t.wt,0);a.forEach(t=>t.bid=Math.max(1,Math.round(t.wt/sw*SP[n])));a.sort((x,y)=>y.bid-x.bid)[0].bid+=SP[n]-a.reduce((x,t)=>x+t.bid,0)});
+return{teams:ts,extra:nm.map(n=>({n}))}}
+function calc(){const cap=live?9:up,tm=DATA.teams.map(t=>Object.assign({},t,{w:Math.min(t.w||0,cap)}));
+S={L:new Set(),regs:[],tm};
+const win=(a,b,c)=>{const w=a&&a.w>c?a:b&&b.w>c?b:null;if(w){const l=w===a?b:a;if(l)S.L.add(l)}return w};
+S.win=win;
+[...new Set(tm.map(t=>t.reg))].forEach(rn=>{const ts=tm.filter(t=>t.reg===rn),lv=[SEEDS.map(s=>ts.filter(t=>t.s===s).sort((x,y)=>y.w-x.w)[0]||null)];
+for(let c=0;c<4;c++)lv.push(lv[c].filter((_,i)=>i%2==0).map((a,i)=>win(a,lv[c][2*i+1],c)));S.regs.push({name:rn,lv})});
+const ch=[0,1,2,3].map(i=>S.regs[i]?S.regs[i].lv[4][0]:null);
+S.semi=[[ch[0],ch[1]],[ch[2],ch[3]]];S.fin=S.semi.map(g=>win(g[0],g[1],4));S.champ=win(S.fin[0],S.fin[1],5)}
+const slot=(t,out)=>{if(!t)return'<div class="slot tbd">TBD</div>';const b=t.b>=0?BID[t.b]:{c:"#8b95a3",fg:"#fff",tag:"—"},k=(out?" out":"")+(sel!==null&&sel!==t.b?" fade":"");
+return `<div class="slot p1${k}"><b style="background:${b.c};color:${b.fg}">${b.tag}</b><i>${t.s}</i><span>${t.n}</span></div>`};
+const game=(a,b,c)=>{const dec=(a&&a.w>c)||(b&&b.w>c);return`<div class="g">${slot(a,dec&&!(a&&a.w>c))}${slot(b,dec&&!(b&&b.w>c))}</div>`};
+const one=t=>`<div class="g" style="flex:0 0 auto;margin:auto 0;min-height:0">${slot(t)}</div>`;
+function render(){calc();const L=S.L,tm=S.tm,tot=tm.reduce((a,t)=>a+(t.bid||0),0);
+const cum=[0];CFG.pay.forEach((p,i)=>cum.push(cum[i]+p));const earn=t=>tot*cum[Math.min(t.w,6)]/100,fm=n=>"$"+Math.round(n).toLocaleString();
+const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>y.won-x.won||x.sp-y.sp),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
+return`<div style="flex:1;min-width:300px"><div class="sub">Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b>${fm(r.won)}</b><br><small style="color:${r.won<r.sp?"#d33":"#2a9d4b"}">${r.won<r.sp?"-":"+"}${fm(Math.abs(r.won-r.sp))}</small></span></div>`).join("")+"</div>"};
+$("stats").innerHTML=`<div class="stat"><b>$${tot.toLocaleString()}</b><span>Total pot</span></div><div class="stat"><b>${tm.length-L.size}</b><span>Teams alive</span></div><div class="stat"><b>${BID.length}</b><span>Bidders</span></div>`;
+$("bar").innerHTML=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),al=ts.filter(t=>!L.has(t)).length;return`<div class="chip${sel===i?" on":""}" onclick="pick(${i})"><i style="background:${b.c};color:${b.fg}">${b.tag}</i><div><b>${b.d}</b> <small>paid ${fm(sp)} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${al}/${ts.length} alive</small></div></div>`}).join("");
+$("detail").innerHTML=sel===null?"":(b=>`<div class="detail"><b>${b.d}</b>'s teams<div>${tm.filter(t=>t.b===sel).sort((x,y)=>x.s-y.s).map(t=>`<span class="dt" style="background:${b.c};color:${b.fg};opacity:${L.has(t)?.4:1}">${t.s} ${t.n} · $${t.bid||0} · won ${fm(earn(t))} ${L.has(t)?"✗":"✓"}</span>`).join("")}</div></div>`)(BID[sel]);
+const names=[...S.regs.map(r=>r.name),"Final Four","Standings"];if(!names.includes(tab))tab=names[0];
+$("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
+const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
+if(tab==="Standings")h=stand();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
+for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
+h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
+else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
+$("br").innerHTML=h}
+const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()};
+async function get(u){const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;return csv(await r.text())}
+const col=(h,re)=>h.findIndex(x=>re.test(x));
+async function load(){try{const R=await get(CFG.teams),h=R[0].map(x=>x.toLowerCase().trim());
+const ix=[/team|school/,/region/,/seed/,/owner|bidder|buyer|name/,/bid|price|paid|cost/,/win/].map(re=>col(h,re));
+const num=v=>parseFloat(String(v||"").replace(/[^0-9.]/g,""))||0;
+const teams=R.slice(1).map(r=>({n:(r[ix[0]]||"").trim(),reg:(r[ix[1]]||"").trim(),s:num(r[ix[2]]),own:(r[ix[3]]||"").trim(),bid:num(r[ix[4]]),w:num(r[ix[5]])})).filter(t=>t.n&&t.reg&&t.s);
+let extra=[];if(CFG.bidders){try{const B=await get(CFG.bidders),bh=B[0].map(x=>x.toLowerCase().trim()),bi=[/name|bidder|owner/,/tag|init/,/colou?r/].map(re=>col(bh,re));extra=B.slice(1).map(r=>({n:(r[bi[0]]||"").trim(),tag:(r[bi[1]]||"").trim(),c:(r[bi[2]]||"").trim()})).filter(x=>x.n)}catch(e){}}
+DATA={teams,extra};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
+catch(e){$("st").textContent=DATA?"Couldn't refresh — showing last update":"Couldn't load the sheet — check the link in CFG"}}
+$("rd").onchange=e=>{up=+e.target.value;render()};
+$("t3").onchange=e=>{T3=e.target.checked;mkBid(DATA.extra);render()};
+if(live){$("demo").style.display="none";$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
+else{DATA=demo();mkBid(DATA.extra);$("st").textContent="Demo data (2025 bracket) · tap a bidder to highlight their teams";render()}
+</script></body></html>
