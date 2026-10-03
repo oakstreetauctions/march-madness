@@ -35,7 +35,7 @@ h1 span{color:var(--blue)}
 .detail div{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
 .dt{border-radius:6px;padding:2px 7px;font:700 13px var(--body)}
 .opt{margin:0 2px 8px}
-.opt summary{display:flex;justify-content:space-between;align-items:center;list-style:none;cursor:pointer;font:500 12px var(--ui);color:var(--mut)}
+.opt summary{display:flex;justify-content:flex-end;align-items:center;list-style:none;cursor:pointer;font:500 12px var(--ui);color:var(--mut)}
 .opt summary::-webkit-details-marker{display:none}
 .opt summary u{text-decoration:none;color:var(--acc);font-weight:600}
 .ctl{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px;padding:9px 11px;background:var(--card);border:1px solid var(--line);border-radius:12px;font:13px var(--ui);color:var(--fg)}
@@ -43,6 +43,7 @@ h1 span{color:var(--blue)}
 select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
 .tabs{display:flex;gap:2px;background:var(--seg);padding:2px;border-radius:10px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
+.tabs.top{margin-bottom:6px}.tabs.top .tab{font-size:14px;padding:8px 11px}
 .tab{flex:1 0 auto;padding:7px 11px;border:0;border-radius:8px;background:transparent;color:var(--mut);font:600 13px var(--ui);white-space:nowrap;cursor:pointer}
 .tab.on{background:var(--sel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .bracket{display:flex;gap:8px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch}
@@ -59,14 +60,38 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .slot.out{opacity:.35;text-decoration:line-through}
 .slot.fade{opacity:.15}
 .slot.tbd{background:transparent;border:1px dashed var(--line);color:var(--mut);justify-content:center;padding:0;font-weight:500;letter-spacing:.1em}
+.ah{display:flex;justify-content:space-between;align-items:center;margin:0 2px 4px;font:12px var(--ui);color:var(--mut)}
+.tabs.sm{margin:0;display:inline-flex;overflow:visible}.tabs.sm .tab{flex:0 0 auto;padding:5px 11px;font-size:12px}
+.ag{font:600 11px var(--ui);text-transform:uppercase;letter-spacing:.08em;color:var(--mut);padding:12px 4px 5px}
+.al{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ar{display:flex;align-items:center;gap:10px;padding:7px 11px}
+.ar+.ar{border-top:1px solid var(--line)}
+.tg{flex:none;min-width:42px;height:30px;padding:0 6px;border-radius:7px;display:grid;place-items:center;font:800 16px var(--body);letter-spacing:.03em}
+.am{flex:1;min-width:0}
+.an{font:700 16px/1.15 var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.am small{font:12px var(--ui);color:var(--mut)}
+.ap{font:italic 800 19px var(--body)}
+.tw{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);-webkit-overflow-scrolling:touch}
+.tw table{border-collapse:separate;border-spacing:0;min-width:100%}
+.tw th{position:sticky;top:0;z-index:3;background:var(--card);font:600 11px var(--ui);text-transform:uppercase;letter-spacing:.05em;color:var(--mut);padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.tw th small{display:block;font:500 10px var(--ui);letter-spacing:0;text-transform:none}
+.tw td{height:46px;padding:0 8px;text-align:right;font:700 15px var(--body);white-space:nowrap;border-top:1px solid var(--line)}
+.tw .c1{position:sticky;left:0;z-index:2;background:var(--card);text-align:left;width:138px;min-width:138px;max-width:138px;overflow:hidden;box-shadow:1px 0 0 var(--line)}
+.tw .c9{position:sticky;right:0;z-index:2;background:var(--card);min-width:60px;box-shadow:-1px 0 0 var(--line);font-weight:800}
+.tw th.c1,.tw th.c9{z-index:4}
+.tw .gh td{background:var(--bg);height:auto;padding:0}
+.gt{position:sticky;left:0;width:max-content;max-width:340px;padding:7px 10px;font:600 11px var(--ui);text-transform:uppercase;letter-spacing:.07em;color:var(--mut)}
+.tc{display:flex;align-items:center;gap:7px}
+.tw .tg{min-width:36px;height:28px;font-size:15px}
+.tw .win,.pos{color:#1f9d4a}.neg{color:#e5484d}
+.tw .out .an{color:var(--mut)}
 @media(min-width:700px){.col{flex-basis:200px}h1{font-size:40px}.hero{padding:16px 18px 16px 24px}.hero:after{width:140px}}
 </style></head>
 <body><div class="wrap">
 <div class="hero"><div class="eye">THE BIG DANCE</div><h1>Oak Street <span>Auctions</span></h1><div class="sub" id="st"></div></div>
 <div class="stats" id="stats"></div>
-<div class="bar" id="bar"></div>
-<div id="detail"></div>
-<details class="opt"><summary><span>Tap a bidder to highlight their teams</span><u>Options</u></summary><div class="ctl"><label><input type="checkbox" id="t3">3-letter tags</label><span id="demo">Demo results through <select id="rd"><option value="0">Start</option><option value="1">Round of 64</option><option value="2">Round of 32</option><option value="3" selected>Sweet 16</option><option value="4">Elite Eight</option><option value="5">Final Four</option><option value="6">Championship</option></select></span></div></details>
+<details class="opt"><summary><u>Options</u></summary><div class="ctl"><label><input type="checkbox" id="t3">3-letter tags</label><span id="demo">Demo results through <select id="rd"><option value="0">Start</option><option value="1">Round of 64</option><option value="2">Round of 32</option><option value="3" selected>Sweet 16</option><option value="4">Elite Eight</option><option value="5">Final Four</option><option value="6">Championship</option></select></span></div></details>
+<div class="tabs top" id="view"></div>
 <div class="tabs" id="tabs"></div>
 <div class="bracket" id="br"></div>
 </div>
@@ -80,7 +105,7 @@ const CFG={teams:"",bidders:"",refreshSec:60,
 const PAL=["#fe928d","#d2e500","#43f1ea","#e2aaf6","#e00219","#b2d886","#09aeef","#fe18b4","#723f03","#07fc4e","#0b45a5","#83285b","#f39e1e","#04581e","#9e07da","#aaffc3","#e6beff","#ffd8b1","#fffac8","#a9a9a9"];
 const SEEDS=[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15];
 const fgOf=c=>{const L=[1,3,5].map(i=>{const v=parseInt(c.slice(i,i+2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,k)=>a+v*[.2126,.7152,.0722][k],0);return(L+.05)/.05>1.05/(L+.05)?"#000":"#fff"};
-let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,T3=false;
+let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,view="bracket",asort="region",T3=false;
 const $=id=>document.getElementById(id);
 const csv=t=>{const o=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){r.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&t[i+1]=="\n")i++;r.push(f);o.push(r);r=[];f=""}else f+=c}if(f||r.length){r.push(f);o.push(r)}return o.filter(r=>r.some(x=>x.trim()))};
 const SFX={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"};
@@ -120,20 +145,28 @@ const game=(a,b,c)=>{const dec=(a&&a.w>c)||(b&&b.w>c);return`<div class="g">${sl
 const one=t=>`<div class="g" style="flex:0 0 auto;margin:auto 0;min-height:0">${slot(t)}</div>`;
 function render(){calc();const L=S.L,tm=S.tm,tot=tm.reduce((a,t)=>a+(t.bid||0),0);
 const cum=[0];CFG.pay.forEach((p,i)=>cum.push(cum[i]+p));const earn=t=>tot*cum[Math.min(t.w,6)]/100,fm=n=>"$"+Math.round(n).toLocaleString();
-const sm=i=>{const ts=tm.filter(t=>t.b===i);return`paid ${fm(ts.reduce((a,t)=>a+(t.bid||0),0))} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${ts.filter(t=>!L.has(t)).length}/${ts.length} alive`};const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>y.won-x.won||x.sp-y.sp),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
+const sm=i=>{const ts=tm.filter(t=>t.b===i);return`paid ${fm(ts.reduce((a,t)=>a+(t.bid||0),0))} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${ts.filter(t=>!L.has(t)).length}/${ts.length} alive`};const auc=()=>{const rg=asort==="region",bd=asort==="bidder",net=t=>earn(t)-(t.bid||0);let g;
+if(!rg&&!bd)g=[{h:"",r:tm.slice().sort(asort==="net"?(a,b)=>net(b)-net(a)||(b.bid||0)-(a.bid||0):(a,b)=>(b.bid||0)-(a.bid||0)||a.s-b.s)}];
+else{const key=rg?t=>t.reg:t=>t.b>=0?BID[t.b].d:"Unsold",ks=rg?S.regs.map(r=>r.name):[...BID.map(b=>b.d).sort((x,y)=>x.localeCompare(y)),"Unsold"];
+g=ks.map(k=>({h:k,r:tm.filter(t=>key(t)===k).sort((a,b)=>rg?a.s-b.s:(b.bid||0)-(a.bid||0))})).filter(x=>x.r.length)}
+const sg=n=>(n=Math.round(n),(n<0?"−":n>0?"+":"")+fm(Math.abs(n))),cl=n=>(n=Math.round(n))<0?"neg":n>0?"pos":"",pays=CFG.pay.map(p=>tot*p/100),lab=["R64","R32","S16","E8","F4","Title"];
+const row=t=>{const b=t.b>=0?BID[t.b]:null,n=net(t);return`<tr class="${L.has(t)?"out":""}"><td class="c1"><div class="tc"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><div class="am"><div class="an">${t.n}</div><small>Seed ${t.s}</small></div></div></td><td>${t.bid?fm(t.bid):"—"}</td>${pays.map((p,k)=>t.w>k?`<td class="win">${fm(p)}</td>`:"<td></td>").join("")}<td class="c9 ${cl(n)}">${t.bid||earn(t)?sg(n):"—"}</td></tr>`};
+const head=`<thead><tr><th class="c1">Team</th><th>Paid</th>${lab.map((l,k)=>`<th>${l}<small>${CFG.pay[k]}%</small></th>`).join("")}<th class="c9">Net</th></tr></thead>`;
+const body=g.map(x=>(x.h?`<tr class="gh"><td colspan="9"><div class="gt">${x.h} · paid ${fm(x.r.reduce((a,t)=>a+(t.bid||0),0))} · net ${sg(x.r.reduce((a,t)=>a+net(t),0))}</div></td></tr>`:"")+x.r.map(row).join("")).join("");
+return`<div style="flex:1;min-width:0"><div class="ah"><span>${fm(tot)} pot</span><div class="tabs sm">${[["region","Region"],["price","Price"],["bidder","Bidder"],["net","Net"]].map(([k,n])=>`<button class="tab${asort===k?" on":""}" onclick="srt('${k}')">${n}</button>`).join("")}</div></div><div class="tw"><table>${head}<tbody>${body}</tbody></table></div></div>`};
+const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>y.won-x.won||x.sp-y.sp),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b>${fm(r.won)}</b><br><small style="color:${r.won<r.sp?"#d33":"#2a9d4b"}">${r.won<r.sp?"-":"+"}${fm(Math.abs(r.won-r.sp))}</small></span></div>`).join("")+"</div>"};
 $("stats").innerHTML=`<div class="stat"><b>$${tot.toLocaleString()}</b><span>Total pot</span></div><div class="stat"><b>${tm.length-L.size}</b><span>Teams alive</span></div><div class="stat"><b>${BID.length}</b><span>Bidders</span></div>`;
-$("bar").innerHTML=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),al=ts.filter(t=>!L.has(t)).length;return`<div class="chip${sel===i?" on":""}" onclick="pick(${i})"><i style="background:${b.c};color:${b.fg}">${b.tag}</i><span>${b.d}</span></div>`}).join("");
-$("detail").innerHTML=sel===null?"":(b=>`<div class="detail"><b>${b.d}</b><small>${sm(sel)}</small><div>${tm.filter(t=>t.b===sel).sort((x,y)=>x.s-y.s).map(t=>`<span class="dt" style="background:${b.c};color:${b.fg};opacity:${L.has(t)?.4:1}">${t.s} ${t.n} · $${t.bid||0} · won ${fm(earn(t))} ${L.has(t)?"✗":"✓"}</span>`).join("")}</div></div>`)(BID[sel]);
-const names=[...S.regs.map(r=>r.name),"Final Four","Standings"];if(!names.includes(tab))tab=names[0];
+const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
+$("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"]].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
-if(tab==="Standings")h=stand();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
+if(view==="standings")h=stand();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
 for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
 $("br").innerHTML=h}
-const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()};
+const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render()},srt=k=>{asort=k;render()};
 async function get(u){const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;return csv(await r.text())}
 const col=(h,re)=>h.findIndex(x=>re.test(x));
 async function load(){try{const R=await get(CFG.teams),h=R[0].map(x=>x.toLowerCase().trim());
