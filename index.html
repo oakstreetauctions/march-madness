@@ -87,7 +87,7 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .tw .win,.pos{color:#1f9d4a}.neg{color:#e5484d}
 .tw .out .an{color:var(--mut)}
 .tw .lh td{background:var(--bg)}.tw .lh .c1,.tw .lh .c9{background:var(--bg)}
-.tw .sub td{height:40px}.tw .sub .an{font-size:15px}
+.tw .lh .an{font-size:16px}.tw .sub td{height:40px}.tw .sub .an{font-size:15px}
 .lbar{display:block;width:4px;height:24px;border-radius:2px;margin:0 16px 0 15px;flex:none}
 @media(min-width:700px){.col{flex-basis:200px}h1{font-size:40px}.hero{padding:16px 18px 16px 24px}.hero:after{width:140px}}
 .sbar{display:flex;margin-bottom:8px}.sel{flex:1;min-width:0;font:600 14px var(--ui);padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg)}
@@ -107,7 +107,7 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 <script>
 /* ===== SETUP: paste Google Sheet "Publish to web" CSV links (File > Share > Publish to web > pick a tab > CSV) =====
    teams   : Region, Seed, Team, Playin (W or L, only for play-in teams), Wins   (one row per team; play-in seeds get two rows)
-   lots    : Region, Seed (a number), Owner, Bid                              (one row per seed sold; a range like 13-16 splits the bid evenly)
+   lots    : Region, Seed (a number, or 13-16), Owner, Bid                    (one row per lot sold; 13-16 = the whole bundle at one price)
    bidders : OPTIONAL  Name, Tag (up to 3 letters), Color (#hex)
    schedule: OPTIONAL  Date, Time, Network, Team 1, Team 2, Round   (one row per game; Date like 3/19/2027, Time like 12:15 PM; team names must match the Teams tab)
    Leave teams "" to see demo data. */
@@ -151,7 +151,7 @@ function calc(){const cap=live?9:up,res=live||up>0;
 const rs=sl=>{const T=sl.teams;if(T.length===1)return T[0];if(!res)return null;let w=T.find(t=>/^(w|won|adv|yes)/i.test(t.pi||"")||t.w>0);if(!w){const rest=T.filter(t=>!/^(l|lost|out|elim|no)/i.test(t.pi||""));if(rest.length===1)w=rest[0]}return w||null};
 const tm=DATA.slots.map(sl=>{const w=rs(sl);return{reg:sl.reg,s:sl.s,n:w?w.n:sl.teams.map(t=>t.n).join(" / "),pi:!w,w:w?Math.min(w.w||0,cap):0,own:"",bid:0,b:-1}});
 S={L:new Set(),regs:[],tm,lots:[]};const used=new Set();
-DATA.lots.forEach(l=>{const sl=tm.filter(t=>t.reg===l.reg&&l.seeds.includes(t.s));if(!sl.length)return;sl.forEach(t=>{used.add(t);t.own=l.own;t.b=l.b;t.bid=l.bid/sl.length;S.lots.push({reg:t.reg,seeds:[t.s],own:l.own,b:l.b,bid:t.bid,sl:[t]})})});
+DATA.lots.forEach(l=>{const sl=tm.filter(t=>t.reg===l.reg&&l.seeds.includes(t.s));if(!sl.length)return;sl.forEach((t,i)=>{used.add(t);t.own=l.own;t.b=l.b;t.bid=i?0:l.bid});S.lots.push({reg:l.reg,seeds:l.seeds,own:l.own,b:l.b,bid:l.bid,sl})});
 tm.forEach(t=>{if(!used.has(t))S.lots.push({reg:t.reg,seeds:[t.s],own:"",b:-1,bid:0,sl:[t]})});
 const win=(a,b,c)=>{const w=a&&a.w>c?a:b&&b.w>c?b:null;if(w){const l=w===a?b:a;if(l)S.L.add(l)}return w};
 S.win=win;
@@ -165,7 +165,7 @@ const game=(a,b,c)=>{const dec=(a&&a.w>c)||(b&&b.w>c);return`<div class="g">${sl
 const one=t=>`<div class="g" style="flex:0 0 auto;margin:auto 0;min-height:0">${slot(t)}</div>`;
 function render(){calc();const L=S.L,tm=S.tm,tot=tm.reduce((a,t)=>a+(t.bid||0),0);
 const cum=[0];CFG.pay.forEach((p,i)=>cum.push(cum[i]+p));const earn=t=>tot*cum[Math.min(t.w,6)]/100,fm=n=>"$"+Math.round(n).toLocaleString();
-const sm=i=>{const ts=tm.filter(t=>t.b===i);return`paid ${fm(ts.reduce((a,t)=>a+(t.bid||0),0))} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${ts.filter(t=>!L.has(t)).length}/${ts.length} alive`};const auc=()=>{const rg=asort==="region",bd=asort==="bidder",lots=S.lots.map(l=>Object.assign({},l,{e:l.sl.reduce((a,t)=>a+earn(t),0)})),net=l=>l.e-l.bid;let g;
+const sm=i=>{const ts=tm.filter(t=>t.b===i);return`paid ${fm(ts.reduce((a,t)=>a+(t.bid||0),0))} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${ts.filter(t=>!L.has(t)).length}/${ts.length} alive`};const auc=()=>{const rg=asort==="region",bd=asort==="bidder",lots=S.lots.map(l=>Object.assign({},l,{e:l.sl.reduce((a,t)=>a+earn(t),0)})),net=l=>Math.round(l.e)-Math.round(l.bid);let g;
 if(!rg&&!bd)g=[{h:"",r:lots.sort(asort==="net"?(a,b)=>net(b)-net(a)||b.bid-a.bid:(a,b)=>b.bid-a.bid||a.seeds[0]-b.seeds[0])}];
 else{const key=rg?l=>l.reg:l=>l.b>=0?BID[l.b].d:"Unsold",ks=rg?S.regs.map(r=>r.name):[...BID.map(b=>b.d).sort((x,y)=>x.localeCompare(y)),"Unsold"];
 g=ks.map(k=>({h:k,r:lots.filter(l=>key(l)===k).sort((a,b)=>rg?a.seeds[0]-b.seeds[0]:b.bid-a.bid)})).filter(x=>x.r.length)}
@@ -173,7 +173,7 @@ const sg=n=>(n=Math.round(n),(n<0?"−":n>0?"+":"")+fm(Math.abs(n))),cl=n=>(n=Ma
 const tgb=b=>`<b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b>`,wc=t=>pays.map((p,k)=>t.w>k?`<td class="win">${fm(p)}</td>`:"<td></td>").join("");
 const row=l=>{const b=l.b>=0?BID[l.b]:null,n=net(l),al=l.sl.filter(t=>!L.has(t)).length;
 if(l.sl.length===1){const t=l.sl[0];return`<tr class="${L.has(t)?"out":""}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">${t.n}</div><small>Seed ${t.s}${t.pi?" · play-in":""}</small></div></div></td><td>${l.bid?fm(l.bid):"—"}</td>${wc(t)}<td class="c9 ${cl(n)}">${l.bid||l.e?sg(n):"—"}</td></tr>`}
-const hd=`<tr class="lh ${al?"":"out"}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">Seeds ${l.seeds[0]}–${l.seeds[l.seeds.length-1]}</div><small>Lot · ${al}/${l.sl.length} alive</small></div></div></td><td>${l.bid?fm(l.bid):"—"}</td><td colspan="6"></td><td class="c9 ${cl(n)}">${l.bid||l.e?sg(n):"—"}</td></tr>`;
+const hd=`<tr class="lh ${al?"":"out"}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">${l.seeds[0]}–${l.seeds[l.seeds.length-1]}</div><small>${al}/${l.sl.length} alive</small></div></div></td><td>${l.bid?fm(l.bid):"—"}</td><td colspan="6"></td><td class="c9 ${cl(n)}">${l.bid||l.e?sg(n):"—"}</td></tr>`;
 return hd+l.sl.slice().sort((x,y)=>x.s-y.s).map(t=>`<tr class="sub ${L.has(t)?"out":""}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">${t.n}</div><small>Seed ${t.s}${t.pi?" · play-in":""}</small></div></div></td><td></td>${wc(t)}<td class="c9"></td></tr>`).join("")};
 const head=`<thead><tr><th class="c1">Lot</th><th>Paid</th>${lab.map((l,k)=>`<th>${l}<small>${CFG.pay[k]}%</small></th>`).join("")}<th class="c9">Net</th></tr></thead>`;
 const body=g.map(x=>(x.h?`<tr class="gh"><td colspan="9"><div class="gt">${x.h} · paid ${fm(x.r.reduce((a,l)=>a+l.bid,0))} · net ${sg(x.r.reduce((a,l)=>a+net(l),0))}</div></td></tr>`:"")+x.r.map(row).join("")).join("");
