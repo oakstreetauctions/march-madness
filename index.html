@@ -12,7 +12,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:10
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.3 var(--ui)}
 .wrap{max-width:1100px;margin:0 auto;padding:10px}
-.hero{position:relative;overflow:hidden;background:#000;color:#fff;border-radius:16px;padding:12px 14px 12px 19px;margin-bottom:10px;border:1px solid #3a3f47}
+.hero{position:relative;overflow:hidden;background:#000;color:#fff;border-radius:16px;padding:14px 14px 14px 19px;margin-bottom:10px;border:1px solid #3a3f47}
 .hero:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--blue)}
 .hero:after{content:"";position:absolute;right:0;top:0;bottom:0;width:84px;background:repeating-linear-gradient(115deg,transparent 0 9px,#009cde 9px 11px,transparent 11px 17px,#8a9099 17px 18px,transparent 18px 26px);pointer-events:none}
 .eye{font:600 10px var(--ui);letter-spacing:.22em;color:#9aa1ab}
@@ -57,6 +57,7 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .slot span{flex:1;overflow:hidden;text-overflow:ellipsis}
 .slot b{font:800 17px/1 var(--body);letter-spacing:.03em;border-radius:5px;padding:4px 7px;background:rgba(0,0,0,.3);color:#fff}
 .slot.p1 b{align-self:stretch;display:grid;place-items:center;width:50px;border-radius:0;padding:0;flex:none}
+.slot span.pi{font-size:12px;line-height:1;white-space:normal}
 .slot.out{opacity:.35;text-decoration:line-through}
 .slot.fade{opacity:.15}
 .slot.tbd{background:transparent;border:1px dashed var(--line);color:var(--mut);justify-content:center;padding:0;font-weight:500;letter-spacing:.1em}
@@ -85,28 +86,41 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .tw .tg{min-width:36px;height:28px;font-size:15px}
 .tw .win,.pos{color:#1f9d4a}.neg{color:#e5484d}
 .tw .out .an{color:var(--mut)}
+.tw .lh td{background:var(--bg)}.tw .lh .c1,.tw .lh .c9{background:var(--bg)}
+.tw .sub td{height:40px}.tw .sub .an{font-size:15px}
+.lbar{display:block;width:4px;height:24px;border-radius:2px;margin:0 16px 0 15px;flex:none}
 @media(min-width:700px){.col{flex-basis:200px}h1{font-size:40px}.hero{padding:16px 18px 16px 24px}.hero:after{width:140px}}
-</style></head>
+.sbar{display:flex;margin-bottom:8px}.sel{flex:1;min-width:0;font:600 14px var(--ui);padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg)}
+.sgl{display:flex;flex-direction:column;gap:8px}.sg{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.sgh{display:flex;align-items:center;gap:8px;margin-bottom:6px;font:700 15px var(--ui)}.sgh small{margin-left:auto;color:var(--mut);font:12px var(--ui)}
+.net{font:700 11px var(--ui);background:var(--fg);color:var(--bg);padding:3px 8px;border-radius:99px;letter-spacing:.03em}
+.sgt{display:flex;align-items:center;gap:8px;min-height:36px;font:700 18px var(--body)}.sgt i{font:600 12px var(--ui);font-style:normal;color:var(--mut);width:16px;text-align:right}.sgt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.foot{text-align:center;margin:14px 0 4px;font-size:11px}</style></head>
 <body><div class="wrap">
-<div class="hero"><div class="eye">THE BIG DANCE</div><h1>Oak Street <span>Auctions</span></h1><div class="sub" id="st"></div></div>
-<div class="stats" id="stats"></div>
+<div class="hero"><h1>Oak Street <span>Auctions</span></h1></div>
 <details class="opt"><summary><u>Options</u></summary><div class="ctl"><label><input type="checkbox" id="t3">3-letter tags</label><span id="demo">Demo results through <select id="rd"><option value="0">Start</option><option value="1">Round of 64</option><option value="2">Round of 32</option><option value="3" selected>Sweet 16</option><option value="4">Elite Eight</option><option value="5">Final Four</option><option value="6">Championship</option></select></span></div></details>
 <div class="tabs top" id="view"></div>
 <div class="tabs" id="tabs"></div>
 <div class="bracket" id="br"></div>
+<div class="sub foot" id="st"></div>
 </div>
 <script>
-/* ===== SETUP: paste your Google Sheet "Publish to web" CSV links (File > Share > Publish to web > pick tab > CSV) =====
-   teams   : tab with columns Team, Region, Seed, Owner, Bid, Wins   (header names are matched loosely)
-   bidders : OPTIONAL tab with columns Name, Tag (up to 3 letters), Color (#hex)
+/* ===== SETUP: paste Google Sheet "Publish to web" CSV links (File > Share > Publish to web > pick a tab > CSV) =====
+   teams   : Region, Seed, Team, Playin (W or L, only for play-in teams), Wins   (one row per team; play-in seeds get two rows)
+   lots    : Region, Seed (a number), Owner, Bid                              (one row per seed sold; a range like 13-16 splits the bid evenly)
+   bidders : OPTIONAL  Name, Tag (up to 3 letters), Color (#hex)
+   schedule: OPTIONAL  Date, Time, Network, Team 1, Team 2, Round   (one row per game; Date like 3/19/2027, Time like 12:15 PM; team names must match the Teams tab)
    Leave teams "" to see demo data. */
-const CFG={teams:"",bidders:"",refreshSec:60,
+const CFG={teams:"",lots:"",bidders:"",schedule:"",refreshSec:60,
   pay:[0.5,1.5,3,4.5,4.5,9]}; // % of total pot paid to the owner for each win: R64, R32, Sweet 16, Elite 8, Final Four, Title
-const PAL=["#fe928d","#d2e500","#43f1ea","#e2aaf6","#e00219","#b2d886","#09aeef","#fe18b4","#723f03","#07fc4e","#0b45a5","#83285b","#f39e1e","#04581e","#9e07da","#aaffc3","#e6beff","#ffd8b1","#fffac8","#a9a9a9"];
+const PAL=["#fe928d","#d2e500","#43f1ea","#e2aaf6","#e00219","#b2d886","#09aeef","#fe18b4","#723f03","#07fc4e","#0b45a5","#83285b","#f39e1e","#04581e","#9e07da","#209b08","#0aefa0","#007f81","#928907","#fe2a6e"];
+/* palettes tuned for each bidder count (2-20): the more bidders, the closer the colors must sit */
+const PALN={"2":["#2413d1","#63fc18"],"3":["#122fe8","#2cff3b","#ff490d"],"4":["#4400cc","#4bd3f7","#ff7010","#63fc18"],"5":["#f1b010","#2b36f1","#4fdef5","#880040","#07fc4e"],"6":["#1f4c00","#2b36f1","#85004c","#2cff3b","#18b7fa","#ff8000"],"7":["#16427c","#07fc4e","#fcd000","#1f4c00","#fc50f1","#42fdff","#b00623"],"8":["#2cff3b","#122fe8","#af1200","#07a2fb","#364806","#f863c3","#fcd000","#1bf7db"],"9":["#6d2e35","#2cff3b","#122fe8","#59fded","#fedc15","#065600","#1898f3","#fe18b4","#ff490d"],"10":["#6affc9","#2413d1","#b20405","#fedc15","#653051","#58f300","#ff76f3","#1f4c00","#fbbf9f","#18b7fa"],"11":["#39f9bc","#4e2dec","#ff7010","#f8e926","#253d85","#31eb0b","#fd5bcf","#1f4c00","#fbcca0","#57d1fe","#7f1b2b"],"12":["#046600","#122fe8","#fbe3ac","#2cff3b","#51c8f7","#ff8000","#20f9c2","#f889ad","#d6dd0c","#fc50f1","#65360b","#373a82"],"13":["#07fc4e","#122fe8","#b20405","#47caf3","#124d07","#fcb6ed","#fc50f1","#efe7ad","#0c55ac","#840050","#ef9805","#d2e500","#20f9c2"],"14":["#f7d9a4","#2b36f1","#ac084f","#63fc18","#2da3ec","#ff7010","#42fdff","#ffb5ea","#efe117","#fc50f1","#6d3e00","#503084","#55c066","#004c33"],"15":["#fde2ac","#2413d1","#3bb4fc","#860048","#2cff3b","#4dfdf6","#00543c","#fe9d1e","#fc50f1","#f9acde","#6d4900","#2f398d","#e8ee2d","#5eb654","#b20405"],"16":["#006b5d","#1827c0","#a4fd15","#fd3895","#6dc4fe","#fcd000","#ff7010","#1bf7db","#433c6a","#f3a7ae","#24a037","#ef1cf6","#85111b","#e4eba0","#d290fb","#6e5e05"],"17":["#2cff3b","#2b36f1","#b20405","#5cc7fb","#09634f","#fd72bc","#f1b010","#e8ea9f","#244270","#762538","#fc997d","#d4f40a","#11b353","#740483","#65fde4","#918ffe","#695500"],"18":["#1bf7db","#2413d1","#fe492f","#d7f236","#fdb8d8","#6e5e05","#29416f","#e8e9ae","#76262f","#f92dff","#24a037","#6083ff","#820986","#2cff3b","#5cc7fb","#fcab1c","#106b58","#ff378e"],"19":["#1bf7db","#2413d1","#ff490d","#d7f236","#ffc0fc","#6c5400","#1d4370","#e5eaaf","#762538","#f92dff","#34a031","#6083ff","#820986","#2cff3b","#56c7f9","#eda503","#1d6a53","#ff378e","#fe9880"],"20":["#4dfdf6","#122fe8","#980002","#fcd000","#004570","#2cff3b","#fc50f1","#695500","#eea181","#5dbdf5","#743543","#918ffe","#7db303","#ff8000","#6f177b","#ffcdfc","#dceda3","#fc669d","#4af095","#18634a"]};
 const SEEDS=[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15];
 const fgOf=c=>{const L=[1,3,5].map(i=>{const v=parseInt(c.slice(i,i+2),16)/255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,k)=>a+v*[.2126,.7152,.0722][k],0);return(L+.05)/.05>1.05/(L+.05)?"#000":"#fff"};
-let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,view="bracket",asort="region",T3=false;
+let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,view="bracket",asort="region",T3=false,sday=null,swho="";
 const $=id=>document.getElementById(id);
+const rng=v=>{const m=String(v||"").match(/(\d+)\D+(\d+)/);return m?Array.from({length:+m[2]-+m[1]+1},(_,i)=>+m[1]+i):[parseInt(v)||0]};
 const csv=t=>{const o=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){r.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&t[i+1]=="\n")i++;r.push(f);o.push(r);r=[];f=""}else f+=c}if(f||r.length){r.push(f);o.push(r)}return o.filter(r=>r.some(x=>x.trim()))};
 const SFX={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"};
 const prs=n=>{n=n.trim();const m=n.match(/^([A-Za-z'\- ]+?)\.\s*([A-Za-z])\.?$/);let f,w;if(m){f=m[2];w=m[1].trim().split(/\s+/)}else{const p=n.split(/\s+/);f=p[0][0];w=[p[p.length-1]]}
@@ -114,25 +128,31 @@ let sx="";if(w.length>1&&SFX[w[w.length-1].toUpperCase()])sx=w.pop().toUpperCase
 const cap=s=>s.toLowerCase().replace(/(^|[\s'-])\w/g,c=>c.toUpperCase());
 const disp=n=>{if(!/\.\s*[A-Za-z]\.?$/.test(n.trim()))return n.trim();const p=prs(n);return p.f+". "+cap(p.l)+(p.sx?" "+(/^[IV]+$/.test(p.sx)?p.sx:cap(p.sx)):"")};
 const auto=(n,three)=>{const p=prs(n),l=p.l.replace(/[^A-Za-z]/g,"").toUpperCase();return three?p.f+(p.sx?l[0]+SFX[p.sx]:l.slice(0,2)):p.f+l[0]};
-function mkBid(extra){const m=new Map();(extra||[]).forEach(x=>m.set(x.n,x));DATA.teams.forEach(t=>{if(t.own&&!m.has(t.own))m.set(t.own,{n:t.own})});
+function mkBid(extra){const m=new Map();(extra||[]).forEach(x=>m.set(x.n,x));DATA.lots.forEach(l=>{if(l.own&&!m.has(l.own))m.set(l.own,{n:l.own})});
 BID=[...m.values()].map(x=>Object.assign({},x));const two=BID.map(x=>auto(x.n,0)),cnt={};two.forEach(k=>cnt[k]=(cnt[k]||0)+1);
-BID.forEach((x,i)=>{x.d=disp(x.n);x.tag=(x.tag||(T3||cnt[two[i]]>1?auto(x.n,1):two[i])).toUpperCase().slice(0,3);if(!/^#[0-9a-f]{6}$/i.test(x.c||""))x.c=PAL[i%PAL.length];x.fg=fgOf(x.c)});
-DATA.teams.forEach(t=>t.b=BID.findIndex(x=>x.n===t.own))}
+let q;BID.forEach((x,i)=>{x.d=disp(x.n);x.tag=(x.tag||(T3||cnt[two[i]]>1?auto(x.n,1):two[i])).toUpperCase().slice(0,3);if(!/^#[0-9a-f]{6}$/i.test(x.c||""))x.c=((q=PALN[Math.min(20,Math.max(2,BID.length))]||PAL))[i%q.length];x.fg=fgOf(x.c)});
+DATA.lots.forEach(l=>l.b=BID.findIndex(x=>x.n===l.own))}
 function demo(){let s=7;const rnd=()=>{s=(s+0x6D2B79F5)|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 const REG=[["South","Auburn,Alabama St,Louisville,Creighton,Michigan,UC San Diego,Texas A&M,Yale,Ole Miss,North Carolina,Iowa St,Lipscomb,Marquette,New Mexico,Michigan St,Bryant",[[0,1,0,0,0,0,1,0],[0,0,0,1],[0,1],[0]]],
 ["West","Florida,Norfolk St,UConn,Oklahoma,Memphis,Colorado St,Maryland,Grand Canyon,Missouri,Drake,Texas Tech,UNC Wilmington,Kansas,Arkansas,St. John's,Omaha",[[0,0,1,0,1,0,1,0],[0,1,1,1],[0,0],[0]]],
 ["East","Duke,Mt. St. Mary's,Mississippi St,Baylor,Oregon,Liberty,Arizona,Akron,BYU,VCU,Wisconsin,Montana,Saint Mary's,Vanderbilt,Alabama,Robert Morris",[[0,1,0,0,0,0,0,0],[0,1,0,1],[0,1],[0]]],
 ["Midwest","Houston,SIUE,Gonzaga,Georgia,Clemson,McNeese,Purdue,High Point,Illinois,Xavier,Kentucky,Troy,UCLA,Utah St,Tennessee,Wofford",[[0,0,1,0,0,0,0,0],[0,1,0,1],[0,1],[0]]]];
-const ts=[];REG.forEach(([reg,nm,picks])=>{const lv=[nm.split(",").map((n,i)=>({n,reg,s:SEEDS[i],w:0}))];ts.push(...lv[0]);picks.forEach((p,k)=>{lv.push(p.map((x,i)=>lv[k][2*i+x]));lv[k+1].forEach(t=>t.w++)})});
-["Florida","Houston","Florida"].forEach(n=>ts.find(t=>t.n===n).w++);
+const slots=[];REG.forEach(([reg,nm,picks])=>{const lv=[nm.split(",").map(n=>({n,w:0,pi:""}))];picks.forEach((p,k)=>{lv.push(p.map((x,i)=>lv[k][2*i+x]));lv[k+1].forEach(t=>t.w++)});lv[0].forEach((t,i)=>slots.push({reg,s:SEEDS[i],teams:[t]}))});
+["Florida","Houston","Florida"].forEach(n=>slots.flatMap(x=>x.teams).find(t=>t.n===n).w++);
+[["South",16,"Saint Francis"],["South",11,"San Diego St"],["East",16,"American"],["Midwest",11,"Texas"]].forEach(([r,sd,ln])=>{const sl=slots.find(x=>x.reg===r&&x.s===sd);sl.teams[0].pi="W";sl.teams.push({n:ln,w:0,pi:"L"})});
 const SP={"BOHNERT. J":660,"BOYD III. B":298,"BOYD IV. B":0,"BOYD. D":0,"BRADBURY. D":628,"FIDLER. J":187,"FLATH. H":400,"FOUGEROUSSE. D":45,"FRENCH. C":573,"HOUSE. C":112,"KAISER. K":320,"MILLER. J":61,"STONE. J":157,"WILLIAMS. K":190,"WYNDHAM. R":260},nm=Object.keys(SP),sn=nm.filter(n=>SP[n]>0),st=sn.reduce((a,n)=>a+SP[n],0);
-const cn=sn.map(n=>Math.max(1,Math.round(SP[n]/st*64)));for(let d=64-cn.reduce((a,b)=>a+b,0),i=0;d;i=(i+1)%cn.length){const e=d>0?1:-1;if(cn[i]+e>=1){cn[i]+=e;d-=e}}
-const ow=sn.flatMap((n,i)=>Array(cn[i]).fill(n)),o=ts.map((_,i)=>i);for(let i=o.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[o[i],o[j]]=[o[j],o[i]]}
-o.forEach((ti,k)=>ts[ti].own=ow[k]);const by={};ts.forEach(t=>(by[t.own]=by[t.own]||[]).push(t));
-Object.entries(by).forEach(([n,a])=>{a.forEach(t=>t.wt=230/Math.pow(t.s,.95)*(.7+rnd()*.6));const sw=a.reduce((x,t)=>x+t.wt,0);a.forEach(t=>t.bid=Math.max(1,Math.round(t.wt/sw*SP[n])));a.sort((x,y)=>y.bid-x.bid)[0].bid+=SP[n]-a.reduce((x,t)=>x+t.bid,0)});
-return{teams:ts,extra:nm.map(n=>({n}))}}
-function calc(){const cap=live?9:up,tm=DATA.teams.map(t=>Object.assign({},t,{w:Math.min(t.w||0,cap)}));
-S={L:new Set(),regs:[],tm};
+const lots=[];REG.forEach(([reg])=>{for(let sd=1;sd<=12;sd++)lots.push({reg,seeds:[sd]});lots.push({reg,seeds:[13,14,15,16]})});
+const NL=lots.length,cn=sn.map(n=>Math.max(1,Math.round(SP[n]/st*NL)));for(let d=NL-cn.reduce((a,b)=>a+b,0),i=0;d;i=(i+1)%cn.length){const e=d>0?1:-1;if(cn[i]+e>=1){cn[i]+=e;d-=e}}
+const ow=sn.flatMap((n,i)=>Array(cn[i]).fill(n)),o=lots.map((_,i)=>i);for(let i=o.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[o[i],o[j]]=[o[j],o[i]]}
+o.forEach((li,k)=>lots[li].own=ow[k]);const by={};lots.forEach(l=>(by[l.own]=by[l.own]||[]).push(l));
+Object.entries(by).forEach(([n,a])=>{a.forEach(l=>l.wt=(l.seeds.length>1?40:230/Math.pow(l.seeds[0],.95))*(.7+rnd()*.6));const sw=a.reduce((x,l)=>x+l.wt,0);a.forEach(l=>l.bid=Math.max(1,Math.round(l.wt/sw*SP[n])));a.sort((x,y)=>y.bid-x.bid)[0].bid+=SP[n]-a.reduce((x,l)=>x+l.bid,0)});
+return{slots,lots,extra:nm.map(n=>({n}))}}
+function calc(){const cap=live?9:up,res=live||up>0;
+const rs=sl=>{const T=sl.teams;if(T.length===1)return T[0];if(!res)return null;let w=T.find(t=>/^(w|won|adv|yes)/i.test(t.pi||"")||t.w>0);if(!w){const rest=T.filter(t=>!/^(l|lost|out|elim|no)/i.test(t.pi||""));if(rest.length===1)w=rest[0]}return w||null};
+const tm=DATA.slots.map(sl=>{const w=rs(sl);return{reg:sl.reg,s:sl.s,n:w?w.n:sl.teams.map(t=>t.n).join(" / "),pi:!w,w:w?Math.min(w.w||0,cap):0,own:"",bid:0,b:-1}});
+S={L:new Set(),regs:[],tm,lots:[]};const used=new Set();
+DATA.lots.forEach(l=>{const sl=tm.filter(t=>t.reg===l.reg&&l.seeds.includes(t.s));if(!sl.length)return;sl.forEach(t=>{used.add(t);t.own=l.own;t.b=l.b;t.bid=l.bid/sl.length;S.lots.push({reg:t.reg,seeds:[t.s],own:l.own,b:l.b,bid:t.bid,sl:[t]})})});
+tm.forEach(t=>{if(!used.has(t))S.lots.push({reg:t.reg,seeds:[t.s],own:"",b:-1,bid:0,sl:[t]})});
 const win=(a,b,c)=>{const w=a&&a.w>c?a:b&&b.w>c?b:null;if(w){const l=w===a?b:a;if(l)S.L.add(l)}return w};
 S.win=win;
 [...new Set(tm.map(t=>t.reg))].forEach(rn=>{const ts=tm.filter(t=>t.reg===rn),lv=[SEEDS.map(s=>ts.filter(t=>t.s===s).sort((x,y)=>y.w-x.w)[0]||null)];
@@ -140,44 +160,64 @@ for(let c=0;c<4;c++)lv.push(lv[c].filter((_,i)=>i%2==0).map((a,i)=>win(a,lv[c][2
 const ch=[0,1,2,3].map(i=>S.regs[i]?S.regs[i].lv[4][0]:null);
 S.semi=[[ch[0],ch[1]],[ch[2],ch[3]]];S.fin=S.semi.map(g=>win(g[0],g[1],4));S.champ=win(S.fin[0],S.fin[1],5)}
 const slot=(t,out)=>{if(!t)return'<div class="slot tbd">TBD</div>';const b=t.b>=0?BID[t.b]:{c:"#8b95a3",fg:"#fff",tag:"—"},k=(out?" out":"")+(sel!==null&&sel!==t.b?" fade":"");
-return `<div class="slot p1${k}"><b style="background:${b.c};color:${b.fg}">${b.tag}</b><i>${t.s}</i><span>${t.n}</span></div>`};
+return `<div class="slot p1${k}"><b style="background:${b.c};color:${b.fg}">${b.tag}</b><i>${t.s}</i><span${t.pi?' class="pi"':""}>${t.n}</span></div>`};
 const game=(a,b,c)=>{const dec=(a&&a.w>c)||(b&&b.w>c);return`<div class="g">${slot(a,dec&&!(a&&a.w>c))}${slot(b,dec&&!(b&&b.w>c))}</div>`};
 const one=t=>`<div class="g" style="flex:0 0 auto;margin:auto 0;min-height:0">${slot(t)}</div>`;
 function render(){calc();const L=S.L,tm=S.tm,tot=tm.reduce((a,t)=>a+(t.bid||0),0);
 const cum=[0];CFG.pay.forEach((p,i)=>cum.push(cum[i]+p));const earn=t=>tot*cum[Math.min(t.w,6)]/100,fm=n=>"$"+Math.round(n).toLocaleString();
-const sm=i=>{const ts=tm.filter(t=>t.b===i);return`paid ${fm(ts.reduce((a,t)=>a+(t.bid||0),0))} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${ts.filter(t=>!L.has(t)).length}/${ts.length} alive`};const auc=()=>{const rg=asort==="region",bd=asort==="bidder",net=t=>earn(t)-(t.bid||0);let g;
-if(!rg&&!bd)g=[{h:"",r:tm.slice().sort(asort==="net"?(a,b)=>net(b)-net(a)||(b.bid||0)-(a.bid||0):(a,b)=>(b.bid||0)-(a.bid||0)||a.s-b.s)}];
-else{const key=rg?t=>t.reg:t=>t.b>=0?BID[t.b].d:"Unsold",ks=rg?S.regs.map(r=>r.name):[...BID.map(b=>b.d).sort((x,y)=>x.localeCompare(y)),"Unsold"];
-g=ks.map(k=>({h:k,r:tm.filter(t=>key(t)===k).sort((a,b)=>rg?a.s-b.s:(b.bid||0)-(a.bid||0))})).filter(x=>x.r.length)}
+const sm=i=>{const ts=tm.filter(t=>t.b===i);return`paid ${fm(ts.reduce((a,t)=>a+(t.bid||0),0))} · won ${fm(ts.reduce((a,t)=>a+earn(t),0))} · ${ts.filter(t=>!L.has(t)).length}/${ts.length} alive`};const auc=()=>{const rg=asort==="region",bd=asort==="bidder",lots=S.lots.map(l=>Object.assign({},l,{e:l.sl.reduce((a,t)=>a+earn(t),0)})),net=l=>l.e-l.bid;let g;
+if(!rg&&!bd)g=[{h:"",r:lots.sort(asort==="net"?(a,b)=>net(b)-net(a)||b.bid-a.bid:(a,b)=>b.bid-a.bid||a.seeds[0]-b.seeds[0])}];
+else{const key=rg?l=>l.reg:l=>l.b>=0?BID[l.b].d:"Unsold",ks=rg?S.regs.map(r=>r.name):[...BID.map(b=>b.d).sort((x,y)=>x.localeCompare(y)),"Unsold"];
+g=ks.map(k=>({h:k,r:lots.filter(l=>key(l)===k).sort((a,b)=>rg?a.seeds[0]-b.seeds[0]:b.bid-a.bid)})).filter(x=>x.r.length)}
 const sg=n=>(n=Math.round(n),(n<0?"−":n>0?"+":"")+fm(Math.abs(n))),cl=n=>(n=Math.round(n))<0?"neg":n>0?"pos":"",pays=CFG.pay.map(p=>tot*p/100),lab=["R64","R32","S16","E8","F4","Title"];
-const row=t=>{const b=t.b>=0?BID[t.b]:null,n=net(t);return`<tr class="${L.has(t)?"out":""}"><td class="c1"><div class="tc"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><div class="am"><div class="an">${t.n}</div><small>Seed ${t.s}</small></div></div></td><td>${t.bid?fm(t.bid):"—"}</td>${pays.map((p,k)=>t.w>k?`<td class="win">${fm(p)}</td>`:"<td></td>").join("")}<td class="c9 ${cl(n)}">${t.bid||earn(t)?sg(n):"—"}</td></tr>`};
-const head=`<thead><tr><th class="c1">Team</th><th>Paid</th>${lab.map((l,k)=>`<th>${l}<small>${CFG.pay[k]}%</small></th>`).join("")}<th class="c9">Net</th></tr></thead>`;
-const body=g.map(x=>(x.h?`<tr class="gh"><td colspan="9"><div class="gt">${x.h} · paid ${fm(x.r.reduce((a,t)=>a+(t.bid||0),0))} · net ${sg(x.r.reduce((a,t)=>a+net(t),0))}</div></td></tr>`:"")+x.r.map(row).join("")).join("");
+const tgb=b=>`<b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b>`,wc=t=>pays.map((p,k)=>t.w>k?`<td class="win">${fm(p)}</td>`:"<td></td>").join("");
+const row=l=>{const b=l.b>=0?BID[l.b]:null,n=net(l),al=l.sl.filter(t=>!L.has(t)).length;
+if(l.sl.length===1){const t=l.sl[0];return`<tr class="${L.has(t)?"out":""}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">${t.n}</div><small>Seed ${t.s}${t.pi?" · play-in":""}</small></div></div></td><td>${l.bid?fm(l.bid):"—"}</td>${wc(t)}<td class="c9 ${cl(n)}">${l.bid||l.e?sg(n):"—"}</td></tr>`}
+const hd=`<tr class="lh ${al?"":"out"}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">Seeds ${l.seeds[0]}–${l.seeds[l.seeds.length-1]}</div><small>Lot · ${al}/${l.sl.length} alive</small></div></div></td><td>${l.bid?fm(l.bid):"—"}</td><td colspan="6"></td><td class="c9 ${cl(n)}">${l.bid||l.e?sg(n):"—"}</td></tr>`;
+return hd+l.sl.slice().sort((x,y)=>x.s-y.s).map(t=>`<tr class="sub ${L.has(t)?"out":""}"><td class="c1"><div class="tc">${tgb(b)}<div class="am"><div class="an">${t.n}</div><small>Seed ${t.s}${t.pi?" · play-in":""}</small></div></div></td><td></td>${wc(t)}<td class="c9"></td></tr>`).join("")};
+const head=`<thead><tr><th class="c1">Lot</th><th>Paid</th>${lab.map((l,k)=>`<th>${l}<small>${CFG.pay[k]}%</small></th>`).join("")}<th class="c9">Net</th></tr></thead>`;
+const body=g.map(x=>(x.h?`<tr class="gh"><td colspan="9"><div class="gt">${x.h} · paid ${fm(x.r.reduce((a,l)=>a+l.bid,0))} · net ${sg(x.r.reduce((a,l)=>a+net(l),0))}</div></td></tr>`:"")+x.r.map(row).join("")).join("");
 return`<div style="flex:1;min-width:0"><div class="ah"><span>${fm(tot)} pot</span><div class="tabs sm">${[["region","Region"],["price","Price"],["bidder","Bidder"],["net","Net"]].map(([k,n])=>`<button class="tab${asort===k?" on":""}" onclick="srt('${k}')">${n}</button>`).join("")}</div></div><div class="tw"><table>${head}<tbody>${body}</tbody></table></div></div>`};
-const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>y.won-x.won||x.sp-y.sp),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
-return`<div style="flex:1;min-width:300px"><div class="sub">Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b>${fm(r.won)}</b><br><small style="color:${r.won<r.sp?"#d33":"#2a9d4b"}">${r.won<r.sp?"-":"+"}${fm(Math.abs(r.won-r.sp))}</small></span></div>`).join("")+"</div>"};
-$("stats").innerHTML=`<div class="stat"><b>$${tot.toLocaleString()}</b><span>Total pot</span></div><div class="stat"><b>${tm.length-L.size}</b><span>Teams alive</span></div><div class="stat"><b>${BID.length}</b><span>Bidders</span></div>`;
+const sch=()=>{const tmBy=new Map();tm.forEach(t=>t.n.split(" / ").forEach(x=>tmBy.set(x.toLowerCase().trim(),t)));const look=n=>String(n).split(" / ").map(x=>tmBy.get(x.toLowerCase().trim())).find(Boolean)||null;
+const pd=s=>{const v=Date.parse(s);return isNaN(v)?null:new Date(v)},mins=s=>{const m=String(s).match(/(\d{1,2}):?(\d{2})?\s*([ap])/i);return m?(+m[1]%12+(/p/i.test(m[3])?12:0))*60+(+m[2]||0):9999};
+const dl=d=>{const p=pd(d);return p?p.toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"}).replace(",",""):d};
+let G=DATA.sched.map(g=>Object.assign({},g,{A:look(g.a),B:look(g.b)}));const who=swho?BID.findIndex(x=>x.n===swho):-1;
+if(who>=0)G=G.filter(g=>(g.A&&g.A.b===who)||(g.B&&g.B.b===who));
+const dk=[...new Set(G.map(g=>g.d))].sort((x,y)=>(pd(x)||0)-(pd(y)||0));
+if(!dk.includes(sday)){const td=new Date(),t0=new Date(td.toDateString());sday=dk.find(d=>{const p=pd(d);return p&&p.toDateString()===td.toDateString()})||dk.find(d=>{const p=pd(d);return p&&p>=t0})||dk[dk.length-1]}
+const row=(n,t)=>{const b=t&&t.b>=0?BID[t.b]:null;return t?`<div class="sgt"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><i>${t.s}</i><span>${n}</span></div>`:`<div class="sgt"><b class="tg" style="background:var(--seg);color:var(--mut)">?</b><i></i><span style="color:var(--mut)">${n||"TBD"}</span></div>`};
+const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<div class="sg"><div class="sgh"><b>${g.t||"TBD"}</b>${g.net?`<span class="net">${g.net}</span>`:""}${g.r?`<small>${g.r}</small>`:""}</div>${row(g.a,g.A)}${row(g.b,g.B)}</div>`).join("")||`<div class="sub" style="padding:16px;text-align:center">No games to show.</div>`;
+return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
+const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
+return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
 const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
-$("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"]].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
+$("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
-if(view==="standings")h=stand();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
+if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
 for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
 $("br").innerHTML=h}
-const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render()},srt=k=>{asort=k;render()};
+const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render()},srt=k=>{asort=k;render()},sdy=k=>{sday=k;render()},swo=v=>{swho=v;render()};
+function demoSched(slots){const by={};slots.forEach(s=>(by[s.reg]=by[s.reg]||{})[s.s]=s.teams.map(t=>t.n).join(" / "));
+const O=[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15],TM=["12:15 PM","12:40 PM","2:45 PM","3:10 PM","6:50 PM","7:15 PM","9:20 PM","9:45 PM"],NT=["CBS","TBS","TNT","truTV"],o=[];
+Object.keys(by).forEach((r,ri)=>{for(let i=0;i<8;i++){const g=(ri%2)*8+i;o.push({d:ri<2?"3/20/2025":"3/21/2025",t:TM[g>>1],net:NT[g%4],r:"Round of 64",a:by[r][O[2*i]],b:by[r][O[2*i+1]]})}});return o}
 async function get(u){const r=await fetch(u+(u.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;return csv(await r.text())}
 const col=(h,re)=>h.findIndex(x=>re.test(x));
 async function load(){try{const R=await get(CFG.teams),h=R[0].map(x=>x.toLowerCase().trim());
-const ix=[/team|school/,/region/,/seed/,/owner|bidder|buyer|name/,/bid|price|paid|cost/,/win/].map(re=>col(h,re));
+const ix=[/team|school/,/region/,/seed/,/play/,/win/].map(re=>col(h,re));
 const num=v=>parseFloat(String(v||"").replace(/[^0-9.]/g,""))||0;
-const teams=R.slice(1).map(r=>({n:(r[ix[0]]||"").trim(),reg:(r[ix[1]]||"").trim(),s:num(r[ix[2]]),own:(r[ix[3]]||"").trim(),bid:num(r[ix[4]]),w:num(r[ix[5]])})).filter(t=>t.n&&t.reg&&t.s);
+const rows=R.slice(1).map(r=>({n:(r[ix[0]]||"").trim(),reg:(r[ix[1]]||"").trim(),s:num(r[ix[2]]),pi:(r[ix[3]]||"").trim(),w:num(r[ix[4]])})).filter(t=>t.n&&t.reg&&t.s);
+let lots=[];if(CFG.lots){const Q=await get(CFG.lots),qh=Q[0].map(x=>x.toLowerCase().trim()),qi=[/region/,/seed|lot/,/owner|bidder|buyer|name/,/bid|price|paid|cost/].map(re=>col(qh,re));lots=Q.slice(1).map(r=>({reg:(r[qi[0]]||"").trim(),seeds:rng(r[qi[1]]),own:(r[qi[2]]||"").trim(),bid:num(r[qi[3]])})).filter(l=>l.reg&&l.seeds[0])}
+const mp=new Map();rows.forEach(t=>{const k=t.reg+"|"+t.s;if(!mp.has(k))mp.set(k,{reg:t.reg,s:t.s,teams:[]});mp.get(k).teams.push(t)});const slots=[...mp.values()];
 let extra=[];if(CFG.bidders){try{const B=await get(CFG.bidders),bh=B[0].map(x=>x.toLowerCase().trim()),bi=[/name|bidder|owner/,/tag|init/,/colou?r/].map(re=>col(bh,re));extra=B.slice(1).map(r=>({n:(r[bi[0]]||"").trim(),tag:(r[bi[1]]||"").trim(),c:(r[bi[2]]||"").trim()})).filter(x=>x.n)}catch(e){}}
-DATA={teams,extra};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
+let sched=null;if(CFG.schedule){try{const Z=await get(CFG.schedule),zh=Z[0].map(x=>x.toLowerCase().trim()),zi=[/date|day/,/time|tip/,/net|chan|tv|broadcast/,/team\s*(1|a)\b|away/,/team\s*(2|b)\b|home/,/round/].map(re=>col(zh,re)),gv=(r,k)=>zi[k]<0?"":(r[zi[k]]||"").trim();
+sched=Z.slice(1).map(r=>({d:gv(r,0),t:gv(r,1),net:gv(r,2),a:gv(r,3),b:gv(r,4),r:gv(r,5)})).filter(g=>g.d&&(g.a||g.b))}catch(e){}}
+DATA={slots,lots,extra,sched};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
 catch(e){$("st").textContent=DATA?"Offline — showing last update":"Can't load the sheet — check the link"}}
 $("rd").onchange=e=>{up=+e.target.value;render()};
 $("t3").onchange=e=>{T3=e.target.checked;mkBid(DATA.extra);render()};
 if(live){$("demo").style.display="none";$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
-else{DATA=demo();mkBid(DATA.extra);$("st").textContent="Demo data · 2025 bracket";render()}
+else{DATA=demo();DATA.sched=demoSched(DATA.slots);mkBid(DATA.extra);$("st").textContent="Demo data · 2025 bracket";render()}
 </script></body></html>
