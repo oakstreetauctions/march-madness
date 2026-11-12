@@ -230,20 +230,20 @@ let sx="";if(w.length>1&&SFX[w[w.length-1].toUpperCase()])sx=w.pop().toUpperCase
 const cap=s=>s.toLowerCase().replace(/(^|[\s'-])\w/g,c=>c.toUpperCase());
 const disp=n=>n.trim().toUpperCase().replace(/\.\s*/,". "); // LAST. F, the same as the golf site
 const auto=(n,three)=>{const p=prs(n),l=p.l.replace(/[^A-Za-z]/g,"").toUpperCase();return three?p.f+(p.sx?l[0]+SFX[p.sx]:l.slice(0,2)):p.f+l[0]};
-/* Tags are worked out once over every bidder in every year, so a bidder's tag never changes from year to year.
-   When two bidders would share the same two letters, BOTH get three (Wyndham RWY, Woodward RWO); suffixes always get three (BB3). */
-let TAGC=null;function TAGS(){if(TAGC)return TAGC;const names=[...new Set(Object.values(YEARS).flatMap(Y=>(Y.lots||[]).map(l=>l[2])))],two={},T={};
+/* Tags: two letters unless two bidders on the same page share them; then BOTH get three (Wyndham RWY, Woodward RWO).
+   A year's pages look at that year's bidders; All-Time and Stats look at everyone. Suffixes always get three (BB3). */
+function TAGS(list){const names=[...new Set(list)],two={},T={};
   names.forEach(n=>{if(prs(n).sx||prs(n).f.length>1)return;const k=auto(n,0);(two[k]=two[k]||[]).push(n)});
   names.forEach(n=>{const p=prs(n);if(p.f.length>1){T[n]=(p.f+p.l.replace(/[^A-Za-z]/g,"")[0]).toUpperCase();return}T[n]=p.sx||(two[auto(n,0)]||[]).length>1?auto(n,1):auto(n,0)});
   const seen={};names.forEach(n=>{let t=T[n];if(seen[t]&&seen[t]!==n){const l=prs(n).l.replace(/[^A-Za-z]/g,"").toUpperCase();for(let j=2;j<l.length&&seen[t];j++)t=prs(n).f+l[0]+l[j];T[n]=t}seen[t]=n});
-  return TAGC=T}
+  return T}
 function mkBid(extra){const m=new Map();(extra||[]).forEach(x=>m.set(x.n,x));DATA.lots.forEach(l=>{if(l.own&&!m.has(l.own))m.set(l.own,{n:l.own})});
 BID=[...m.values()].map(x=>Object.assign({},x));const two=BID.map(x=>auto(x.n,0)),cnt={};two.forEach(k=>cnt[k]=(cnt[k]||0)+1);
-const MI=new Map(MASTER.map((m,i)=>[m[0],i])),usedC=new Set(),usedT=new Set();let sp=0,q;
+const MI=new Map(MASTER.map((m,i)=>[m[0],i])),usedC=new Set(),usedT=new Set(),TG=TAGS(BID.map(x=>x.n));let sp=0,q;
 BID.map((x,i)=>i).sort((a,b)=>(MI.has(BID[a].n)?MI.get(BID[a].n):999)-(MI.has(BID[b].n)?MI.get(BID[b].n):999)||BID[a].n.localeCompare(BID[b].n)).forEach((i,k)=>{const x=BID[i],m=MASTER[MI.get(x.n)];x.d=disp(x.n);
   let c=/^#[0-9a-f]{6}$/i.test(x.c||"")?x.c:m?m[1]:"";if(!c||usedC.has(c.toUpperCase())){while(sp<SPARE.length&&usedC.has(SPARE[sp]))sp++;c=sp<SPARE.length?SPARE[sp++]:((q=PALN[Math.min(20,Math.max(2,BID.length))]||PAL))[k%q.length];x.spare=true}
   x.c=c;usedC.add(c.toUpperCase());
-  let t=(x.tag||"").toUpperCase();if(!t){t=TAGS()[x.n];if(!t){const t2=auto(x.n,0);t=T3||prs(x.n).sx||usedT.has(t2)?auto(x.n,1):t2}}x.tag=t.slice(0,3);usedT.add(x.tag);x.fg=fgOf(x.c)});
+  let t=(x.tag||"").toUpperCase();if(!t){t=TG[x.n];if(!t){const t2=auto(x.n,0);t=T3||prs(x.n).sx||usedT.has(t2)?auto(x.n,1):t2}}x.tag=t.slice(0,3);usedT.add(x.tag);x.fg=fgOf(x.c)});
 DATA.lots.forEach(l=>l.b=BID.findIndex(x=>x.n===l.own))}
 
 /* ===== Live results from ESPN: no sheet to fill in. One request returns every NCAA Tournament game for a season.
