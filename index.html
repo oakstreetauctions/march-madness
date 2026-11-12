@@ -256,7 +256,7 @@ function statsData(){if(ST)return ST;const keep={DATA,BID,S},cum=[0];CFG.pay.for
       const lot={y,reg:l.reg,seed:bund?"13–16":String(l.seeds[0]),sn:l.seeds[0],team:bund?`${l.reg} 13–16`:l.sl[0].n,own:l.own,bid:l.bid,won,wins:Math.max(...l.sl.map(t=>t.w)),tot,champ:l.sl.includes(S.champ)};
       lots.push(lot);if(lot.champ)yrs[yrs.length-1].champBid=l.bid;
       const slot=D.slots.filter(x=>x.reg===l.reg&&l.seeds.includes(x.s));
-      slot.forEach(sl=>sl.teams.forEach(t=>{const pl=/^l/i.test(t.pi||"");teams.push({y,team:t.n,seed:sl.s,reg:sl.reg,own:l.own,bid:l.bid/l.sl.length,won:pl?0:earn({w:t.w}),wins:pl?-1:t.w,pi:!!t.pi,bund})}))}}
+      slot.forEach(sl=>sl.teams.forEach(t=>{const pl=/^l/i.test(t.pi||"");teams.push({y,team:t.n,seed:sl.s,reg:sl.reg,own:l.own,bid:pl?0:l.bid/l.sl.length,won:pl?0:earn({w:t.w}),wins:pl?-1:t.w,pi:!!t.pi,bund})}))}}
   DATA={lots:[...new Set(lots.map(l=>l.own))].map(n=>({own:n}))};mkBid([]);const look={};BID.forEach(b=>{const m=MASTER.find(x=>x[0]===b.n);if(m){b.c=m[1];b.fg=fgOf(m[1])}look[b.n]=b});
   DATA=keep.DATA;BID=keep.BID;S=keep.S;return ST={lots,teams,yrs,look}}
 const SF=n=>"$"+Math.round(n).toLocaleString(),SG=n=>{n=Math.round(n);return(n<0?"−":n>0?"+":"")+SF(Math.abs(n))},SC=n=>Math.round(n)<0?"#d33":Math.round(n)>0?"#2a9d4b":"inherit";
@@ -310,7 +310,7 @@ function bidHTML(D){const L=D.look,names=Object.keys(L).sort((a,b)=>L[a].d.local
     h3+=Object.keys(YEARS).sort().reverse().filter(y=>yrsOf[sel].has(y)).map(y=>{const a=my.filter(l=>l.y===y),p=a.reduce((s,l)=>s+l.bid,0),w=a.reduce((s,l)=>s+l.won,0);
       return`<div class="yrh"><b>${y}</b><span>${SF(p)} paid · ${SF(w)} won</span><b style="color:${SC(w-p)}">${SG(w-p)}</b></div>`+a.sort((x,z)=>z.won-x.won||z.bid-x.bid).map(l=>`<div class="yrr"><i></i><span>${l.team} <small>(${l.seed})</small></span><small>${RS[Math.min(Math.max(l.wins,0),6)]}</small><span>${SF(l.bid)}</span><span style="color:${SC(l.won-l.bid)}">${SG(l.won-l.bid)}</span></div>`).join("")}).join("")}
   return card("Go-to seeds",h)+card("Go-to teams",h2,"tap for each year")+card("Bidder profile",h3)}
-function yearRows(ys,L){return`<div class="drill">`+ys.slice().sort((a,b)=>b.y-a.y).map(t=>`<div class="yrr">${tagS(t.own,L)}<span>${t.y} · ${t.seed} seed${t.pi?" (play-in)":""}</span><small>${t.wins<0?"Lost First Four":RS[Math.min(t.wins,6)]}</small><span>${SF(t.bid)}</span><span style="color:${SC(t.won-t.bid)}">${SG(t.won-t.bid)}</span></div>`).join("")+`</div>`}
+function yearRows(ys,L){return`<div class="drill">`+ys.slice().sort((a,b)=>b.y-a.y).map(t=>`<div class="yrr">${tagS(t.own,L)}<span>${t.y} · ${t.seed} seed${t.pi?" (play-in)":""}</span><small>${t.wins<0?"Lost First Four":RS[Math.min(t.wins,6)]}</small>${t.wins<0&&t.pi?`<span style="color:var(--mut)">—</span><span style="color:var(--mut)">—</span>`:`<span>${SF(t.bid)}</span><span style="color:${SC(t.won-t.bid)}">${SG(t.won-t.bid)}</span>`}</div>`).join("")+`</div>`}
 function teamHTML(D){const L=D.look,q=steam.trim().toLowerCase(),T={};D.teams.forEach(t=>{const o=T[t.team]||(T[t.team]={team:t.team,ys:[],sp:0,won:0,best:-1,titles:0,own:new Set()});o.ys.push(t);o.sp+=t.bid;o.won+=t.won;o.best=Math.max(o.best,t.wins);if(t.wins===6)o.titles++;o.own.add(t.own)});
   let A=Object.values(T).filter(o=>!q||o.team.toLowerCase().includes(q)).sort((a,b)=>(Math.round(b.won)-Math.round(b.sp))-(Math.round(a.won)-Math.round(a.sp))||b.ys.length-a.ys.length||a.team.localeCompare(b.team));
   const all=q||sopen==="tall";const shown=all?A:A.slice(0,40);
