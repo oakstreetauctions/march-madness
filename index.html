@@ -174,9 +174,24 @@ nav button:hover{color:#fff}nav button.on{color:#fff;border-bottom-color:#009cde
 /* chip initials: optically centered. The condensed font sits its capitals ~.05em low and letter-spacing adds space after the last letter, so nudge both back */
 .dt{padding:calc(2px + .04em) 7px calc(2px - .04em)}
 .tg{padding:0 6px .04em;text-indent:.03em}.slot b,.slot.p1 b{padding:0 0 .055em;text-indent:.03em}.chip i{padding:0 6px .04em;text-indent:.03em}
+
+/* ===== home page ===== */
+.hm{padding:6px 2px 4px}.hm .k{font:600 10.5px var(--ui);letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.hm h2{margin:4px 0 2px;font:italic 800 34px/1 var(--body);text-transform:uppercase;letter-spacing:.01em}.hm h2 span{color:#009cde}
+.hm p{margin:6px 0 0;font:13px var(--ui);color:var(--mut)}
+.nxc{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-top:3px solid #009cde;border-radius:12px;padding:12px 14px;margin:12px 0}
+.nxc .cal{width:54px;text-align:center;border:1px solid var(--line);border-radius:8px;overflow:hidden}.nxc .cal b{display:block;background:#009cde;color:#fff;font:700 9.5px var(--ui);letter-spacing:.14em;padding:3px 0}
+.nxc .cal strong{display:block;font:800 24px/1.1 var(--body);padding-top:2px}.nxc .cal small{display:block;font:600 9px var(--ui);color:var(--mut);letter-spacing:.1em;text-transform:uppercase;padding-bottom:4px}
+.nxc .m small{font:600 10px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}.nxc .m b{display:block;font:700 19px var(--body);text-transform:uppercase}.nxc .m span{font:12px var(--ui);color:var(--mut)}
+.nxc .cd{text-align:right}.nxc .cd strong{display:block;font:800 30px/1 var(--body)}.nxc .cd small{font:600 9.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.feat{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px;padding:0;cursor:pointer;color:inherit;font:inherit}
+.feat .band{display:flex;justify-content:space-between;background:#000;color:#fff;padding:7px 12px;font:600 10.5px var(--ui);letter-spacing:.14em;text-transform:uppercase;border-left:5px solid #009cde}
+.feat .bd{padding:12px 14px}.feat .ev{font:700 21px var(--body);text-transform:uppercase}.feat .ch{display:flex;align-items:center;gap:8px;margin-top:6px;font:600 15px var(--ui)}.feat .ch small{color:var(--mut);font-weight:500}
+.feat .ft{display:flex;justify-content:space-between;margin-top:10px;font:12px var(--ui);color:var(--mut)}.feat .ft b{color:var(--acc);font-weight:600}
+.qlinks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 8px}.qlinks button svg{color:#009cde}.qlinks button{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font:600 13px var(--ui);color:var(--fg);cursor:pointer}
 </style></head>
 <body>
-<header><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('bracket')">Oak Street <span>Auctions</span></h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
+<header><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('home')">Oak Street <span>Auctions</span></h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
 <nav id="nav"></nav>
 <div class="drawer" id="drawer"><div class="drawer-bg" onclick="dr(0)"></div><div class="drawer-card" id="drawerCard" role="dialog" aria-label="Menu"></div></div>
 <div class="wrap">
@@ -205,7 +220,7 @@ const YEARS={"2023":{"order":["South","East","West","Midwest"],"slots":[["South"
 const SEEDS=[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15];
 const FGM={};MASTER.forEach(m=>FGM[m[1].toUpperCase()]=m[2]);
 const fgOf=c=>{if(FGM[c.toUpperCase()])return FGM[c.toUpperCase()];const n=parseInt(c.slice(1),16);return(.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255>.6?"#000":"#fff"};
-let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,view="bracket",asort="region",T3=false,sday=null,swho="";
+let DATA,BID=[],S,live=!!CFG.teams,up=3,sel=null,tab=null,view="home",asort="region",T3=false,sday=null,swho="";
 const $=id=>document.getElementById(id);
 const rng=v=>{const m=String(v||"").match(/(\d+)\D+(\d+)/);return m?Array.from({length:+m[2]-+m[1]+1},(_,i)=>+m[1]+i):[parseInt(v)||0]};
 const csv=t=>{const o=[];let r=[],f="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}else if(c=='"')q=true;else if(c==","){r.push(f);f=""}else if(c=="\n"||c=="\r"){if(c=="\r"&&t[i+1]=="\n")i++;r.push(f);o.push(r);r=[];f=""}else f+=c}if(f||r.length){r.push(f);o.push(r)}return o.filter(r=>r.some(x=>x.trim()))};
@@ -251,7 +266,7 @@ function espnBuild(j,order){
   const over=G.some(g=>g.rnd==="National Championship"&&g.done);
   return{slots,sched,over,any:G.length}}
 let ESPN_YEAR=null,YR=null;
-function setYear(y,first){if(view==="alltime"||view==="stats")view="bracket";if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
+function setYear(y,first){if(!first&&(view==="alltime"||view==="stats"||view==="home"))view="bracket";if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
   try{history.replaceState(null,"",y===Object.keys(YEARS).sort().pop()?location.pathname:"?year="+y)}catch(e){}
   const force=first&&/[?&]espn=1/.test(location.search);
   if(YEARS[y].espn||force){DATA=DATA||null;$("st").textContent="Loading from ESPN…";loadESPN(y);ESPN_YEAR=setInterval(()=>{if(document.visibilityState==="visible")loadESPN(y)},CFG.refreshSec*1000)}
@@ -429,9 +444,9 @@ const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<di
 return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
 const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
-const yk=Object.keys(YEARS).sort().reverse(),side=view==="alltime"||view==="stats";
-$("evpick").className="evpick"+(side?" plain":"");
-$("evpick").innerHTML=side?`<span>${view==="alltime"?"All-Time Standings":"Stats &amp; Records"}</span>`:`<span>${YR} Tournament</span>${yk.length>1?`<span class="car3">▾</span><select aria-label="Pick a year" onchange="setYear(this.value)">${yk.map(y=>`<option value="${y}"${y===YR?" selected":""}>${y} Tournament</option>`).join("")}</select>`:""}`;
+const yk=Object.keys(YEARS).sort().reverse(),side=view==="alltime"||view==="stats"||view==="home";
+$("evpick").className="evpick"+(side&&view!=="home"?" plain":"");
+$("evpick").innerHTML=view==="home"?`<span>Pick a tournament</span><span class="car3">▾</span><select aria-label="Pick a year" onchange="setYear(this.value)"><option value="" selected disabled>Pick a tournament</option>${yk.map(y=>`<option value="${y}">${y} Tournament</option>`).join("")}</select>`:side?`<span>${view==="alltime"?"All-Time Standings":"Stats &amp; Records"}</span>`:`<span>${YR} Tournament</span>${yk.length>1?`<span class="car3">▾</span><select aria-label="Pick a year" onchange="setYear(this.value)">${yk.map(y=>`<option value="${y}"${y===YR?" selected":""}>${y} Tournament</option>`).join("")}</select>`:""}`;
 $("nav").style.display=side?"none":"";
 const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
 $("nav").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="${view===k?"on":""}" onclick="vw('${k}')">${n}</button>`).join("");
@@ -439,17 +454,33 @@ if($("drawer").classList.contains("on"))drawDr();
 $("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
-if(view==="alltime")h=allHTML();else if(view==="stats")h=statsHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
+if(view==="home")h=homeHTML();else if(view==="alltime")h=allHTML();else if(view==="stats")h=statsHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
 for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
-$("br").innerHTML=h}
-const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render();if(k==='alltime'||k==='stats')scrollTo(0,0)},srt=k=>{asort=k;render()},sdy=k=>{sday=k;render()},swo=v=>{swho=v;render()};
+$("br").innerHTML=h;$("st").style.display=view==="home"?"none":""}
+const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render();if(k==='alltime'||k==='stats'||k==='home')scrollTo(0,0)},srt=k=>{asort=k;render()},sdy=k=>{sday=k;render()},swo=v=>{swho=v;render()};
 
+
+/* ===== home page: next auction, the latest champion, all-time leaders, champions by year ===== */
+let SCHED=null;fetch("/schedule.json",{cache:"no-store"}).then(r=>r.json()).then(j=>{SCHED=j;if(view==="home")render()}).catch(()=>{});
+function nextCard(sport,color){if(!SCHED)return"";const t=new Date();t.setHours(0,0,0,0);const a=(SCHED.auctions||[]).filter(x=>x.sport===sport).map(x=>Object.assign({},x,{dt:new Date(x.date+"T12:00:00")})).find(x=>x.dt>=t);if(!a)return"";
+  const d=Math.round((a.dt-t)/864e5);return`<div class="nxc"><div class="cal"><b>${a.dt.toLocaleDateString(undefined,{month:"short"}).toUpperCase()}</b><strong>${a.dt.getDate()}</strong><small>${a.dt.toLocaleDateString(undefined,{weekday:"short"})}</small></div><div class="m"><small>Next auction</small><b>${a.dt.getFullYear()} ${a.name}</b><span>${a.detail||""}</span></div><div class="cd"><strong>${d===0?"Today":d}</strong><small>${d===0?"":d===1?"day":"days"}</small></div></div>`}
+function homeHTML(){const D=statsData(),A=allTime(),L=D.look,pot=D.yrs.reduce((a,y)=>a+y.tot,0),ly=D.yrs[D.yrs.length-1],latest=Object.keys(YEARS).sort().pop();
+  let h=`<div class="hm"><div class="k">NCAA Tournament Calcutta</div><h2>March <span>Madness</span></h2><p>${D.yrs.length} tournaments · ${SF(pot)} in pots · ${D.yrs[0].y}–${ly.y}</p></div>`;
+  h+=nextCard("mm");
+  const live=latest!==ly.y;
+  h+=`<button class="feat" onclick="setYear('${latest}')"><div class="band"><span>${live?"Live now":"Most recent"}</span><span>${latest} Tournament</span></div><div class="bd">`+(live?`<div class="ev">${latest} NCAA Tournament</div><div class="ch">Bracket, payouts and standings</div><div class="ft"><span></span><b>Follow along →</b></div>`:
+    `<div class="ev">${ly.champ} won it all</div><div class="ch">${tagS(ly.champOwn,L)}<span>${L[ly.champOwn].d} <small>· paid ${SF(ly.champBid)}</small></span></div><div class="ft"><span>${SF(ly.tot)} pot</span><b>See the bracket →</b></div>`)+`</div></button>`;
+  h+=card("All-time leaders",A.rows.slice(0,5).map((r,i)=>`<div class="sr tapp" onclick="vw('alltime')"><b style="width:16px;color:var(--mut)">${i+1}</b>${tagS(r.n,L)}<div class="srm"><b>${L[r.n].d}${r.t.length?" "+"🏆".repeat(r.t.length):""}</b></div><b class="srv" style="color:${SC(r.net)}">${SG(r.net)}</b></div>`).join("")+`<button class="tab" style="width:100%;border-radius:0;border-top:1px solid var(--line);padding:11px;color:var(--acc)" onclick="vw('alltime')">Full standings →</button>`,"net");
+  h+=card("Champions",D.yrs.slice().reverse().map(y=>`<div class="sr tapp" onclick="setYear('${y.y}')"><span class="dt" style="background:var(--seg);color:var(--fg)">’${y.y.slice(2)}</span><div class="srm"><b>${y.champ}</b><small>${SF(y.tot)} pot · paid ${SF(y.champBid)}</small></div>${tagS(y.champOwn,L)}</div>`).join(""),"tap a year");
+  h+=`<div class="qlinks"><button onclick="vw('alltime')"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>All-Time Standings</button><button onclick="vw('stats')"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Stats &amp; Records</button></div>`;
+  return`<div style="flex:1;min-width:0">${h}</div>`}
 /* ===== hamburger menu (same layout as the golf site) ===== */
-function drawDr(){const side=view==="alltime"||view==="stats",yk=Object.keys(YEARS).sort().reverse();
+function drawDr(){const side=view==="alltime"||view==="stats"||view==="home",yk=Object.keys(YEARS).sort().reverse();
   $("drawerCard").innerHTML=`<div class="dr-head"><b>Oak Street <span>Auctions</span></b><button onclick="dr(0)" aria-label="Close menu">✕</button></div>
-  <button class="dr-link${!side?" on":""}" style="margin-top:8px" onclick="dr(0);vw('bracket')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.5 3.5 3.5 9.3 0 12.8M18.4 5.6c-3.5 3.5-3.5 9.3 0 12.8"/></svg></span>${YR} Tournament</button>
+  <button class="dr-link${view==="home"?" on":""}" style="margin-top:8px" onclick="dr(0);vw('home')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg></span>Home</button>
+  <button class="dr-link${!side?" on":""}" onclick="dr(0);vw('bracket')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.5 3.5 3.5 9.3 0 12.8M18.4 5.6c-3.5 3.5-3.5 9.3 0 12.8"/></svg></span>${YR} Tournament</button>
   <button class="dr-link${view==="alltime"?" on":""}" onclick="dr(0);vw('alltime')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg></span>All-Time Standings</button>
   <button class="dr-link${view==="stats"?" on":""}" onclick="dr(0);vw('stats')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats &amp; Records</button>
   <div class="dr-div"><span>Tournaments</span></div><div class="dr-grid">${yk.map(y=>`<button class="dr-cell${!side&&y===YR?" on":""}" onclick="dr(0);setYear('${y}')">${y}</button>`).join("")}</div>
@@ -476,5 +507,5 @@ sched=Z.slice(1).map(r=>({d:gv(r,0),t:gv(r,1),net:gv(r,2),a:gv(r,3),b:gv(r,4),r:
 DATA={slots,lots,extra,sched};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
 catch(e){$("st").textContent=DATA?"Offline — showing last update":"Can't load the sheet — check the link"}}
 if(live){$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
-else{up=9;const q=(location.search.match(/[?&]year=(\d{4})/)||[])[1];setYear(YEARS[q]?q:Object.keys(YEARS).sort().pop(),1)}
+else{up=9;const q=(location.search.match(/[?&]year=(\d{4})/)||[])[1],now=new Date(),cy=String(now.getFullYear()),inWin=YEARS[cy]&&now>=new Date(cy+'-03-10')&&now<=new Date(cy+'-04-09');if(q||inWin)view='bracket';setYear(YEARS[q]?q:Object.keys(YEARS).sort().pop(),1)}
 </script></body></html>
