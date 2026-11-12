@@ -97,6 +97,9 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .sgh{display:flex;align-items:center;gap:8px;margin-bottom:6px;font:700 15px var(--ui)}.sgh small{margin-left:auto;color:var(--mut);font:12px var(--ui)}
 .net{font:700 11px var(--ui);background:var(--fg);color:var(--bg);padding:3px 8px;border-radius:99px;letter-spacing:.03em}
 .sgt{display:flex;align-items:center;gap:8px;min-height:36px;font:700 18px var(--body)}.sgt i{font:600 12px var(--ui);font-style:normal;color:var(--mut);width:16px;text-align:right}.sgt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgt em{font:700 18px var(--body);font-style:normal;font-variant-numeric:tabular-nums;color:var(--mut);min-width:30px;text-align:right}
+.sgt em.w{color:var(--fg)}
+.sgt.lost span{color:var(--mut)}
 .foot{text-align:center;margin:14px 0 4px;font-size:11px}</style></head>
 <body><div class="wrap">
 <div class="hero"><h1>Oak Street <span>Auctions</span></h1><a class="home" href="/" aria-label="All Oak Street auctions" title="All auctions"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg></a></div>
@@ -111,7 +114,7 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
    teams   : Region, Seed, Team, Playin (W or L, only for play-in teams), Wins   (one row per team; play-in seeds get two rows)
    lots    : Region, Seed (a number, or 13-16), Owner, Bid                    (one row per lot sold; 13-16 = the whole bundle at one price)
    bidders : OPTIONAL  Name, Tag (up to 3 letters), Color (#hex)
-   schedule: OPTIONAL  Date, Time, Network, Team 1, Team 2, Round   (one row per game; Date like 3/19/2027, Time like 12:15 PM; team names must match the Teams tab)
+   schedule: OPTIONAL  Date, Time, Network, Team 1, Team 2, Round, Score (like 71-65, Team 1 first; one row per game; Date like 3/19/2027, Time like 12:15 PM; team names must match the Teams tab)
    Leave teams "" to see demo data. */
 const CFG={teams:"",lots:"",bidders:"",schedule:"",refreshSec:60,
   pay:[0.5,1.5,3,4.5,4.5,9]}; // % of total pot paid to the owner for each win: R64, R32, Sweet 16, Elite 8, Final Four, Title
@@ -164,7 +167,7 @@ Object.entries(by).forEach(([n,a])=>{a.forEach(l=>l.wt=(l.seeds.length>1?40:230/
 return{slots,lots,extra:nm.map(n=>({n}))}}
 function calc(){const cap=live?9:up,res=live||up>0;
 const rs=sl=>{const T=sl.teams;if(T.length===1)return T[0];if(!res)return null;let w=T.find(t=>/^(w|won|adv|yes)/i.test(t.pi||"")||t.w>0);if(!w){const rest=T.filter(t=>!/^(l|lost|out|elim|no)/i.test(t.pi||""));if(rest.length===1)w=rest[0]}return w||null};
-const tm=DATA.slots.map(sl=>{const w=rs(sl);return{reg:sl.reg,s:sl.s,n:w?w.n:sl.teams.map(t=>t.n).join(" / "),pi:!w,w:w?Math.min(w.w||0,cap):0,own:"",bid:0,b:-1}});
+const tm=DATA.slots.map(sl=>{const w=rs(sl);return{reg:sl.reg,s:sl.s,all:sl.teams.map(t=>t.n),n:w?w.n:sl.teams.map(t=>t.n).join(" / "),pi:!w,w:w?Math.min(w.w||0,cap):0,own:"",bid:0,b:-1}});
 S={L:new Set(),regs:[],tm,lots:[]};const used=new Set();
 DATA.lots.forEach(l=>{const sl=tm.filter(t=>t.reg===l.reg&&l.seeds.includes(t.s));if(!sl.length)return;sl.forEach((t,i)=>{used.add(t);t.own=l.own;t.b=l.b;t.bid=i?0:l.bid});S.lots.push({reg:l.reg,seeds:l.seeds,own:l.own,b:l.b,bid:l.bid,sl})});
 tm.forEach(t=>{if(!used.has(t))S.lots.push({reg:t.reg,seeds:[t.s],own:"",b:-1,bid:0,sl:[t]})});
@@ -193,15 +196,16 @@ return hd+l.sl.slice().sort((x,y)=>x.s-y.s).map(t=>`<tr class="sub ${L.has(t)?"o
 const head=`<thead><tr><th class="c1">Lot</th><th>Paid</th>${lab.map((l,k)=>`<th>${l}<small>${CFG.pay[k]}%</small></th>`).join("")}<th class="c9">Net</th></tr></thead>`;
 const body=g.map(x=>(x.h?`<tr class="gh"><td colspan="9"><div class="gt">${x.h} · paid ${fm(x.r.reduce((a,l)=>a+l.bid,0))} · net ${sg(x.r.reduce((a,l)=>a+net(l),0))}</div></td></tr>`:"")+x.r.map(row).join("")).join("");
 return`<div style="flex:1;min-width:0"><div class="ah"><span>${fm(tot)} pot</span><div class="tabs sm">${[["region","Region"],["price","Price"],["bidder","Bidder"],["net","Net"]].map(([k,n])=>`<button class="tab${asort===k?" on":""}" onclick="srt('${k}')">${n}</button>`).join("")}</div></div><div class="tw"><table>${head}<tbody>${body}</tbody></table></div></div>`};
-const sch=()=>{const tmBy=new Map();tm.forEach(t=>t.n.split(" / ").forEach(x=>tmBy.set(x.toLowerCase().trim(),t)));const look=n=>String(n).split(" / ").map(x=>tmBy.get(x.toLowerCase().trim())).find(Boolean)||null;
+const sch=()=>{const tmBy=new Map();tm.forEach(t=>(t.all||t.n.split(" / ")).forEach(x=>tmBy.set(x.toLowerCase().trim(),t)));const look=n=>String(n).split(" / ").map(x=>tmBy.get(x.toLowerCase().trim())).find(Boolean)||null;
 const pd=s=>{const v=Date.parse(s);return isNaN(v)?null:new Date(v)},mins=s=>{const m=String(s).match(/(\d{1,2}):?(\d{2})?\s*([ap])/i);return m?(+m[1]%12+(/p/i.test(m[3])?12:0))*60+(+m[2]||0):9999};
 const dl=d=>{const p=pd(d);return p?p.toLocaleDateString(undefined,{weekday:"short",month:"numeric",day:"numeric"}).replace(",",""):d};
 let G=DATA.sched.map(g=>Object.assign({},g,{A:look(g.a),B:look(g.b)}));const who=swho?BID.findIndex(x=>x.n===swho):-1;
 if(who>=0)G=G.filter(g=>(g.A&&g.A.b===who)||(g.B&&g.B.b===who));
 const dk=[...new Set(G.map(g=>g.d))].sort((x,y)=>(pd(x)||0)-(pd(y)||0));
 if(!dk.includes(sday)){const td=new Date(),t0=new Date(td.toDateString());sday=dk.find(d=>{const p=pd(d);return p&&p.toDateString()===td.toDateString()})||dk.find(d=>{const p=pd(d);return p&&p>=t0})||dk[dk.length-1]}
-const row=(n,t)=>{const b=t&&t.b>=0?BID[t.b]:null;return t?`<div class="sgt"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><i>${t.s}</i><span>${n}</span></div>`:`<div class="sgt"><b class="tg" style="background:var(--seg);color:var(--mut)">?</b><i></i><span style="color:var(--mut)">${n||"TBD"}</span></div>`};
-const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<div class="sg"><div class="sgh"><b>${g.t||"TBD"}</b>${g.net?`<span class="net">${g.net}</span>`:""}${g.r?`<small>${g.r}</small>`:""}</div>${row(g.a,g.A)}${row(g.b,g.B)}</div>`).join("")||`<div class="sub" style="padding:16px;text-align:center">No games to show.</div>`;
+const scs=g=>{const m=String(g.sc||"").match(/(\d+)\D+(\d+)/);return m?[+m[1],+m[2]]:null};
+const row=(n,t,sc,won)=>{const b=t&&t.b>=0?BID[t.b]:null,cl=won===false?' lost':"",pts=sc==null?"":`<em${won?' class="w"':""}>${sc}</em>`;return t?`<div class="sgt${cl}"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><i>${t.s}</i><span>${n}</span>${pts}</div>`:`<div class="sgt${cl}"><b class="tg" style="background:var(--seg);color:var(--mut)">?</b><i></i><span style="color:var(--mut)">${n||"TBD"}</span>${pts}</div>`};
+const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<div class="sg"><div class="sgh"><b>${scs(g)?"Final":g.t||"TBD"}</b>${g.net?`<span class="net">${g.net}</span>`:""}${g.r?`<small>${g.r}</small>`:""}</div>${(x=>x?row(g.a,g.A,x[0],x[0]>x[1])+row(g.b,g.B,x[1],x[1]>x[0]):row(g.a,g.A)+row(g.b,g.B))(scs(g))}</div>`).join("")||`<div class="sub" style="padding:16px;text-align:center">No games to show.</div>`;
 return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
 const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
@@ -227,8 +231,8 @@ const rows=R.slice(1).map(r=>({n:(r[ix[0]]||"").trim(),reg:(r[ix[1]]||"").trim()
 let lots=[];if(CFG.lots){const Q=await get(CFG.lots),qh=Q[0].map(x=>x.toLowerCase().trim()),qi=[/region/,/seed|lot/,/owner|bidder|buyer|name/,/bid|price|paid|cost/].map(re=>col(qh,re));lots=Q.slice(1).map(r=>({reg:(r[qi[0]]||"").trim(),seeds:rng(r[qi[1]]),own:(r[qi[2]]||"").trim(),bid:num(r[qi[3]])})).filter(l=>l.reg&&l.seeds[0])}
 const mp=new Map();rows.forEach(t=>{const k=t.reg+"|"+t.s;if(!mp.has(k))mp.set(k,{reg:t.reg,s:t.s,teams:[]});mp.get(k).teams.push(t)});const slots=[...mp.values()];
 let extra=[];if(CFG.bidders){try{const B=await get(CFG.bidders),bh=B[0].map(x=>x.toLowerCase().trim()),bi=[/name|bidder|owner/,/tag|init/,/colou?r/].map(re=>col(bh,re));extra=B.slice(1).map(r=>({n:(r[bi[0]]||"").trim(),tag:(r[bi[1]]||"").trim(),c:(r[bi[2]]||"").trim()})).filter(x=>x.n)}catch(e){}}
-let sched=null;if(CFG.schedule){try{const Z=await get(CFG.schedule),zh=Z[0].map(x=>x.toLowerCase().trim()),zi=[/date|day/,/time|tip/,/net|chan|tv|broadcast/,/team\s*(1|a)\b|away/,/team\s*(2|b)\b|home/,/round/].map(re=>col(zh,re)),gv=(r,k)=>zi[k]<0?"":(r[zi[k]]||"").trim();
-sched=Z.slice(1).map(r=>({d:gv(r,0),t:gv(r,1),net:gv(r,2),a:gv(r,3),b:gv(r,4),r:gv(r,5)})).filter(g=>g.d&&(g.a||g.b))}catch(e){}}
+let sched=null;if(CFG.schedule){try{const Z=await get(CFG.schedule),zh=Z[0].map(x=>x.toLowerCase().trim()),zi=[/date|day/,/time|tip/,/net|chan|tv|broadcast/,/team\s*(1|a)\b|away/,/team\s*(2|b)\b|home/,/round/,/score|result|final/].map(re=>col(zh,re)),gv=(r,k)=>zi[k]<0?"":(r[zi[k]]||"").trim();
+sched=Z.slice(1).map(r=>({d:gv(r,0),t:gv(r,1),net:gv(r,2),a:gv(r,3),b:gv(r,4),r:gv(r,5),sc:gv(r,6)})).filter(g=>g.d&&(g.a||g.b))}catch(e){}}
 DATA={slots,lots,extra,sched};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
 catch(e){$("st").textContent=DATA?"Offline — showing last update":"Can't load the sheet — check the link"}}
 $("rd").onchange=e=>{up=+e.target.value;render()};
