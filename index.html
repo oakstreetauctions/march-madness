@@ -99,6 +99,7 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .sgt{display:flex;align-items:center;gap:8px;min-height:36px;font:700 18px var(--body)}.sgt i{font:600 12px var(--ui);font-style:normal;color:var(--mut);width:16px;text-align:right}.sgt span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sgt em{font:700 18px var(--body);font-style:normal;font-variant-numeric:tabular-nums;color:var(--mut);min-width:30px;text-align:right}
 .sgt em.w{color:var(--fg)}
+.sgh b.lv{color:#e0242f}
 .sgt.lost span{color:var(--mut)}
 .foot{text-align:center;margin:14px 0 4px;font-size:11px}</style></head>
 <body><div class="wrap">
@@ -147,6 +148,40 @@ BID.map((x,i)=>i).sort((a,b)=>(MI.has(BID[a].n)?MI.get(BID[a].n):999)-(MI.has(BI
   x.c=c;usedC.add(c.toUpperCase());
   let t=(x.tag||"").toUpperCase();if(!t){const t2=auto(x.n,0);t=T3||usedT.has(t2)?auto(x.n,1):t2}x.tag=t.slice(0,3);usedT.add(x.tag);x.fg=fgOf(x.c)});
 DATA.lots.forEach(l=>l.b=BID.findIndex(x=>x.n===l.own))}
+
+/* ===== Live results from ESPN: no sheet to fill in. One request returns every NCAA Tournament game for a season.
+   For a year marked espn:true in YEARS, the site builds the bracket, wins and schedule (times, TV, live scores) from ESPN,
+   and only the auction lots come from YEARS. Add ?espn=1 to the address to rebuild the latest year from ESPN. ===== */
+const ESPN_MM=y=>`https://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?dates=${y}&seasontype=3&groups=100&limit=300`;
+const RN={"First Four":"First Four","1st Round":"Round of 64","2nd Round":"Round of 32","Sweet 16":"Sweet 16","Elite 8":"Elite 8","Final Four":"Final Four","National Championship":"Championship"};
+function espnBuild(j,order){
+  const G=(j.events||[]).map(e=>{const c=(e.competitions||[])[0]||{},h=((c.notes||[])[0]||{}).headline||"";if(!/Men's Basketball Championship/i.test(h))return null;
+    const m=h.match(/- (\w+) Region - (.+)$/),st=((c.status||e.status||{}).type)||{};
+    return{date:new Date(e.date),reg:m?m[1]:"",rnd:m?m[2]:h.split(" - ").pop(),done:!!st.completed,live:st.state==="in",det:st.shortDetail||"",
+      net:(((c.broadcasts||[])[0]||{}).names||[])[0]||"",
+      t:(c.competitors||[]).map(x=>({id:x.team&&x.team.id,n:(x.team&&x.team.shortDisplayName)||"TBD",s:+((x.curatedRank||{}).current)||0,w:!!x.winner,sc:x.score}))}}).filter(Boolean);
+  const slot=new Map(),regOf={};
+  const add=(reg,t,ff)=>{if(!t.id||!reg||!(t.s>=1&&t.s<=16))return;const k=reg+"|"+t.s;if(!slot.has(k))slot.set(k,{reg,s:t.s,teams:[]});const sl=slot.get(k);
+    let x=sl.teams.find(z=>z.id===t.id);if(!x){if(!ff&&sl.teams.some(z=>z.ff))return;x={id:t.id,n:t.n,w:0,pi:"",ff:!!ff};sl.teams.push(x)}regOf[t.id]=reg;return x};
+  G.filter(g=>g.rnd==="First Four").forEach(g=>g.t.forEach(t=>{const x=add(g.reg,t,1);if(x&&g.done)x.pi=t.w?"W":"L"}));
+  G.filter(g=>g.rnd==="1st Round").forEach(g=>g.t.forEach(t=>add(g.reg,t,0)));
+  const byId={};slot.forEach(sl=>sl.teams.forEach(t=>byId[t.id]=t));
+  G.filter(g=>g.done&&g.rnd!=="First Four").forEach(g=>g.t.forEach(t=>{if(t.w&&byId[t.id])byId[t.id].w++}));
+  let regs=[...new Set([...slot.values()].map(x=>x.reg))];const ff=G.filter(g=>g.rnd==="Final Four");
+  if(order&&order.length===4&&order.every(r=>regs.includes(r)))regs=order.slice();
+  else if(ff.length===2&&ff.every(g=>g.t.length===2&&g.t.every(t=>regOf[t.id])))regs=ff.flatMap(g=>g.t.map(t=>regOf[t.id]));
+  const slots=[];regs.forEach(r=>SEEDS.forEach(sd=>{const x=slot.get(r+"|"+sd);if(x)slots.push(x)}));
+  const sched=G.slice().sort((a,b)=>a.date-b.date).map(g=>{const d=g.date,[a,b]=g.t;const sc=(g.done||g.live)&&a&&b&&a.sc!=null&&b.sc!=null?a.sc+"-"+b.sc:"";
+    return{d:`${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`,t:d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"}),net:g.net,a:a?a.n:"TBD",b:b?b.n:"TBD",r:RN[g.rnd]||g.rnd,sc,st:g.done?"final":g.live?"live":"",det:g.det}});
+  const over=G.some(g=>g.rnd==="National Championship"&&g.done);
+  return{slots,sched,over,any:G.length}}
+let ESPN_YEAR=null;
+async function loadESPN(y){try{const r=await fetch(ESPN_MM(y)+"&t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;const x=espnBuild(await r.json(),YEARS[y].order);
+    if(!x.slots.length){$("st").textContent=x.any?"Waiting on ESPN for the bracket":"The bracket isn't out yet";if(!DATA)return}
+    else{const lots=(YEARS[y].lots||[]).map(([reg,sd,own,bid])=>({reg,seeds:rng(sd),own,bid}));DATA={slots:x.slots,lots,extra:[],sched:x.sched};mkBid(DATA.extra);
+      $("st").textContent=x.over?`${y} auction · final results`:`${y} auction · live from ESPN · updated ${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}`;render()}
+    if(x.over&&ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}}
+  catch(e){$("st").textContent=DATA?"Can't reach ESPN — showing the last update":"Can't reach ESPN right now"}}
 function yearData(y){const Y=YEARS[y];const slots=Y.slots.map(([reg,s,ts])=>({reg,s,teams:ts.map(([n,w,pi])=>({n,w,pi}))}));
   const lots=Y.lots.map(([reg,sd,own,bid])=>({reg,seeds:rng(sd),own,bid}));
   const sched=(Y.sched||[]).map(([d,t,net,a,b,r,sc])=>({d,t,net,a,b,r,sc}));return{slots,lots,extra:[],sched}}
@@ -204,8 +239,8 @@ if(who>=0)G=G.filter(g=>(g.A&&g.A.b===who)||(g.B&&g.B.b===who));
 const dk=[...new Set(G.map(g=>g.d))].sort((x,y)=>(pd(x)||0)-(pd(y)||0));
 if(!dk.includes(sday)){const td=new Date(),t0=new Date(td.toDateString());sday=dk.find(d=>{const p=pd(d);return p&&p.toDateString()===td.toDateString()})||dk.find(d=>{const p=pd(d);return p&&p>=t0})||dk[dk.length-1]}
 const scs=g=>{const m=String(g.sc||"").match(/(\d+)\D+(\d+)/);return m?[+m[1],+m[2]]:null};
-const row=(n,t,sc,won)=>{const b=t&&t.b>=0?BID[t.b]:null,cl=won===false?' lost':"",pts=sc==null?"":`<em${won?' class="w"':""}>${sc}</em>`;return t?`<div class="sgt${cl}"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><i>${t.s}</i><span>${n}</span>${pts}</div>`:`<div class="sgt${cl}"><b class="tg" style="background:var(--seg);color:var(--mut)">?</b><i></i><span style="color:var(--mut)">${n||"TBD"}</span>${pts}</div>`};
-const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<div class="sg"><div class="sgh"><b>${scs(g)?"Final":g.t||"TBD"}</b>${g.net?`<span class="net">${g.net}</span>`:""}${g.r?`<small>${g.r}</small>`:""}</div>${(x=>x?row(g.a,g.A,x[0],x[0]>x[1])+row(g.b,g.B,x[1],x[1]>x[0]):row(g.a,g.A)+row(g.b,g.B))(scs(g))}</div>`).join("")||`<div class="sub" style="padding:16px;text-align:center">No games to show.</div>`;
+const row=(n,t,sc,won)=>{const b=t&&t.b>=0?BID[t.b]:null,cl=won===false?' lost':"",pts=sc==null?"":`<em${won||won===undefined?' class="w"':""}>${sc}</em>`;return t?`<div class="sgt${cl}"><b class="tg" style="background:${b?b.c:"#8b95a3"};color:${b?b.fg:"#fff"}">${b?b.tag:"—"}</b><i>${t.s}</i><span>${n}</span>${pts}</div>`:`<div class="sgt${cl}"><b class="tg" style="background:var(--seg);color:var(--mut)">?</b><i></i><span style="color:var(--mut)">${n||"TBD"}</span>${pts}</div>`};
+const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<div class="sg"><div class="sgh"><b${g.st==="live"?' class="lv"':""}>${g.st==="live"?(g.det||"Live"):g.st==="final"||(!g.st&&scs(g))?(g.det&&/final/i.test(g.det)?g.det:"Final"):g.t||"TBD"}</b>${g.net?`<span class="net">${g.net}</span>`:""}${g.r?`<small>${g.r}</small>`:""}</div>${(x=>x?(g.st==="live"?row(g.a,g.A,x[0])+row(g.b,g.B,x[1]):row(g.a,g.A,x[0],x[0]>x[1])+row(g.b,g.B,x[1],x[1]>x[0])):row(g.a,g.A)+row(g.b,g.B))(scs(g))}</div>`).join("")||`<div class="sub" style="padding:16px;text-align:center">No games to show.</div>`;
 return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
 const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
@@ -238,5 +273,7 @@ catch(e){$("st").textContent=DATA?"Offline — showing last update":"Can't load 
 $("rd").onchange=e=>{up=+e.target.value;render()};
 $("t3").onchange=e=>{T3=e.target.checked;mkBid(DATA.extra);render()};
 if(live){$("demo").style.display="none";$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
-else{const y=Object.keys(YEARS).sort().pop();DATA=yearData(y);up=9;$("demo").style.display="none";mkBid(DATA.extra);$("st").textContent=y+" auction · final results";render()}
+else{const y=Object.keys(YEARS).sort().pop(),force=/[?&]espn=1/.test(location.search);up=9;$("demo").style.display="none";
+  if(YEARS[y].espn||force){$("st").textContent="Loading from ESPN…";loadESPN(y);ESPN_YEAR=setInterval(()=>{if(document.visibilityState==="visible")loadESPN(y)},CFG.refreshSec*1000)}
+  else{DATA=yearData(y);mkBid(DATA.extra);$("st").textContent=y+" auction · final results";render()}}
 </script></body></html>
