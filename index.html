@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b2d5b">
+<meta name="theme-color" content="#000000">
 <title>Oak Street Auctions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -139,43 +139,40 @@ table.atg .c1{text-align:left;width:1%}
 .sgt.lost span{color:var(--mut)}
 .foot{text-align:center;margin:14px 0 4px;font-size:11px}
 /* ===== shared Oak Street shell (matches the golf site): header, hamburger menu, year picker, nav ===== */
-:root{padding-top:0;--bg:#f6f4ec;--fg:#1c2a21;--card:#fff;--line:#e6e2d4;--mut:#6d7468;--seg:#ebe7da;--row:#faf9f4;--ui:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Libre Caslon Text",Georgia,serif;--hdr:#0b2d5b;--hdrfg:#fff;--gold:#f2c94c;--acc:#0b2d5b}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0e14;--fg:#eef1f5;--card:#131922;--line:#252e3a;--mut:#949eab;--seg:#1a212b;--row:#161d27;--sel:#2c3644;--hdr:#071d3b;--acc:#6aa8ff}}
-:root[data-theme="dark"]{--bg:#0a0e14;--fg:#eef1f5;--card:#131922;--line:#252e3a;--mut:#949eab;--seg:#1a212b;--row:#161d27;--sel:#2c3644;--hdr:#071d3b;--acc:#6aa8ff}
+:root{padding-top:0;--hdr:#000;--hdrfg:#fff;--gold:#009cde;--row:var(--seg);--serif:var(--body)}
 header{position:relative;background:var(--hdr);color:var(--hdrfg);padding:calc(env(safe-area-inset-top,0px) + 18px) 48px 14px;text-align:center}
-header h1{margin:0;font:400 27px/1.1 var(--serif);letter-spacing:.06em;text-transform:none;cursor:pointer;color:inherit}
-@media (max-width:460px){header h1{font-size:clamp(17px,5.4vw,23px);letter-spacing:.04em;white-space:nowrap}}
+header{overflow:hidden;border-bottom:1px solid #2a2f36}header:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:#009cde}header:after{content:"";position:absolute;right:0;top:0;bottom:0;width:70px;background:repeating-linear-gradient(115deg,transparent 0 9px,#009cde 9px 11px,transparent 11px 17px,#8a9099 17px 18px,transparent 18px 26px);opacity:.55;pointer-events:none}
+header h1{position:relative;z-index:1;margin:0;font:italic 800 30px/1 var(--body);letter-spacing:.01em;text-transform:uppercase;cursor:pointer;color:inherit}header h1 span{color:#009cde}
+header h1 span{display:block}@media(min-width:600px){header h1 span{display:inline}}
+header .rule,.evpick,.burger{position:relative;z-index:1}
 header .rule{width:44px;height:1px;background:var(--gold);margin:10px auto 0;opacity:.9}
-.burger{position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 14px);width:40px;height:40px;border:0;background:none;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.burger{position:absolute!important;left:10px;top:calc(env(safe-area-inset-top,0px) + 14px);width:40px;height:40px;border:0;background:none;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px}
 .burger:hover{background:rgba(255,255,255,.1)}.burger svg{width:22px;height:22px}
 .evpick{position:relative;display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:4px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:#fff}
 .evpick .car3{font-size:9px;opacity:.85}.evpick.plain{border:0;padding:0;margin-top:8px;opacity:.9}
 .evpick select{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px}
 nav{position:sticky;top:0;z-index:5;background:var(--hdr);display:flex;padding:0 8px;justify-content:center;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 2px 8px rgba(0,0,0,.08)}
 nav button{flex:1 1 0;max-width:160px;appearance:none;border:0;background:none;color:rgba(255,255,255,.66);font:600 11.5px var(--ui);letter-spacing:.11em;text-transform:uppercase;padding:13px 2px 11px;border-bottom:2px solid transparent;cursor:pointer}
-nav button:hover{color:#fff}nav button.on{color:#fff;border-bottom-color:var(--gold)}
+nav button:hover{color:#fff}nav button.on{color:#fff;border-bottom-color:#009cde}nav{border-bottom:1px solid #2a2f36}
 .wrap{padding-top:12px}
 .drawer{position:fixed;inset:0;z-index:60;display:none}.drawer.on{display:block}
 .drawer-bg{position:absolute;inset:0;background:rgba(10,20,30,.45);animation:fade .15s}
 .drawer-card{position:absolute;left:0;top:0;bottom:0;width:min(330px,88vw);background:var(--bg);overflow:auto;box-shadow:6px 0 30px rgba(0,0,0,.25);animation:slide .2s ease-out;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 @keyframes slide{from{transform:translateX(-100%)}to{transform:none}}@keyframes fade{from{opacity:0}to{opacity:1}}
 .dr-head{background:var(--hdr);color:var(--hdrfg);padding:calc(env(safe-area-inset-top,0px) + 18px) 16px 16px;display:flex;align-items:center;justify-content:space-between}
-.dr-head b{font:400 19px var(--serif);letter-spacing:.05em}
+.dr-head{border-left:5px solid #009cde}.dr-head b{font:italic 800 22px var(--body);text-transform:uppercase}.dr-head b span{color:#009cde}
 .dr-head button{border:0;background:none;color:inherit;font-size:18px;cursor:pointer;width:36px;height:36px}
 .dr-link{text-decoration:none;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);text-align:left;padding:11px 16px;font:600 14px var(--ui);cursor:pointer;border-left:3px solid transparent}
-.dr-link:hover{background:var(--row)}.dr-link.on{border-left-color:var(--acc);background:var(--row)}
-.dr-link .ic{width:20px;display:flex;justify-content:center;color:var(--acc)}
+.dr-link:hover{background:var(--row)}.dr-link.on{border-left-color:#009cde;background:var(--row)}
+.dr-link .ic{width:20px;display:flex;justify-content:center;color:#009cde}
 .dr-div{display:flex;align-items:center;gap:10px;padding:12px 16px 2px;font:600 9.5px var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
 .dr-div::after{content:"";flex:1;height:1px;background:var(--line)}
 .dr-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 16px 8px}
-.dr-cell{height:34px;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:4px;background:var(--card);color:var(--fg);font:600 12.5px var(--ui);cursor:pointer;padding:0}
-.dr-cell:hover{background:var(--row)}.dr-cell.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.sc{border-radius:4px;box-shadow:0 1px 2px rgba(28,42,33,.06),0 4px 14px rgba(28,42,33,.04)}
-.sch{font:400 15px var(--serif);color:var(--acc);text-transform:none;letter-spacing:0}
-.sch span:last-child{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase}
+.dr-cell{height:34px;border:1px solid var(--line);border-left:3px solid #009cde;border-radius:4px;background:var(--card);color:var(--fg);font:600 12.5px var(--ui);cursor:pointer;padding:0}
+.dr-cell:hover{background:var(--row)}.dr-cell.on{background:#009cde;border-color:#009cde;color:#fff}
 </style></head>
 <body>
-<header><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('bracket')">Oak Street Auctions</h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
+<header><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('bracket')">Oak Street <span>Auctions</span></h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
 <nav id="nav"></nav>
 <div class="drawer" id="drawer"><div class="drawer-bg" onclick="dr(0)"></div><div class="drawer-card" id="drawerCard" role="dialog" aria-label="Menu"></div></div>
 <div class="wrap">
@@ -447,7 +444,7 @@ const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k
 
 /* ===== hamburger menu (same layout as the golf site) ===== */
 function drawDr(){const side=view==="alltime"||view==="stats",yk=Object.keys(YEARS).sort().reverse();
-  $("drawerCard").innerHTML=`<div class="dr-head"><b>Oak Street Auctions</b><button onclick="dr(0)" aria-label="Close menu">✕</button></div>
+  $("drawerCard").innerHTML=`<div class="dr-head"><b>Oak Street <span>Auctions</span></b><button onclick="dr(0)" aria-label="Close menu">✕</button></div>
   <button class="dr-link${!side?" on":""}" style="margin-top:8px" onclick="dr(0);vw('bracket')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.5 3.5 3.5 9.3 0 12.8M18.4 5.6c-3.5 3.5-3.5 9.3 0 12.8"/></svg></span>${YR} Tournament</button>
   <button class="dr-link${view==="alltime"?" on":""}" onclick="dr(0);vw('alltime')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg></span>All-Time Standings</button>
   <button class="dr-link${view==="stats"?" on":""}" onclick="dr(0);vw('stats')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats &amp; Records</button>
