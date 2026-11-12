@@ -101,6 +101,35 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .sgt em.w{color:var(--fg)}
 .sgh b.lv{color:#e0242f}
 .tabs.yrs{margin-bottom:8px}
+.sc{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.sch{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);font:700 17px var(--body);letter-spacing:.02em;text-transform:uppercase}
+.sch span:last-child{font:500 11px var(--ui);color:var(--mut);text-transform:none;letter-spacing:0}
+.srl{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase;color:var(--mut);padding:10px 12px 2px}
+.sr{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:1px solid var(--line)}
+.sr:last-child{border-bottom:0}
+.sr.tapp{cursor:pointer}.sr.tapp:hover{background:var(--seg)}
+.srm{flex:1;min-width:0;display:flex;flex-direction:column}
+.srm b{font:700 16px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srm b small{font:500 12px var(--ui);color:var(--mut)}
+.srm small{font:12px var(--ui);color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srv{font:700 17px var(--body);white-space:nowrap;font-variant-numeric:tabular-nums}
+.hbr{display:grid;grid-template-columns:40px minmax(0,1fr) 52px;gap:8px;align-items:center;padding:3px 12px;font:600 12px var(--ui)}
+.hbr b{text-align:right;font-variant-numeric:tabular-nums}
+.hbt{position:relative;height:10px;background:var(--seg);border-radius:3px;overflow:hidden}
+.hbt i{position:absolute;top:0;bottom:0}.hbt .mid{left:50%;width:1px;background:var(--mut);opacity:.5}.hbt .fill{border-radius:3px;max-width:100%}
+.note2{font:12px var(--ui);color:var(--mut);padding:8px 12px 12px}
+.tiles2{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 0 4px}
+.tiles2 div{background:var(--seg);border-radius:8px;padding:7px 8px}
+.tiles2 small{display:block;font:600 10px var(--ui);color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.tiles2 b{font:700 18px var(--body)}
+.yrh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:baseline;padding:9px 12px 4px;border-top:1px solid var(--line);font:600 12px var(--ui)}
+.yrh span{color:var(--mut);font-weight:500}.yrh b{font:700 16px var(--body)}
+.yrr{display:grid;grid-template-columns:auto minmax(0,1fr) 34px 46px 54px;gap:6px;align-items:center;padding:4px 12px;font:600 13px var(--ui);font-variant-numeric:tabular-nums}
+.yrr>span:nth-child(n+3){text-align:right}.yrr small{color:var(--mut);font-weight:500;text-align:center}
+.yrr span:first-child small,.yrr span small{color:var(--mut);font-weight:500}
+.drill{background:var(--seg);padding:4px 0 6px;border-bottom:1px solid var(--line)}
+.sc>.sel,.sc>div>.sel,.sc .tiles2,.sc>.sub{margin-left:12px;margin-right:12px}
+
 .tabs.yrs .tab.at{margin-left:auto;font-weight:700}
 table.atg{border-collapse:collapse;width:100%;font:600 12px var(--ui);font-variant-numeric:tabular-nums}
 table.atg th,table.atg td{padding:6px 3px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -182,7 +211,7 @@ function espnBuild(j,order){
   const over=G.some(g=>g.rnd==="National Championship"&&g.done);
   return{slots,sched,over,any:G.length}}
 let ESPN_YEAR=null,YR=null;
-function setYear(y,first){if(view==="alltime")view="bracket";if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
+function setYear(y,first){if(view==="alltime"||view==="stats")view="bracket";if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
   try{history.replaceState(null,"",y===Object.keys(YEARS).sort().pop()?location.pathname:"?year="+y)}catch(e){}
   const force=first&&/[?&]espn=1/.test(location.search);
   if(YEARS[y].espn||force){DATA=DATA||null;$("st").textContent="Loading from ESPN…";loadESPN(y);ESPN_YEAR=setInterval(()=>{if(document.visibilityState==="visible")loadESPN(y)},CFG.refreshSec*1000)}
@@ -214,6 +243,90 @@ function allHTML(){const A=allTime(),fm=n=>"$"+Math.round(n).toLocaleString(),sg
   h+=`<div class="sub" style="margin-top:14px">Champions owned</div>`;
   h+=A.rows.filter(r=>r.t.length).map(r=>`<div class="sub" style="display:flex;align-items:center;gap:8px;margin:4px 0"><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span>${r.t.join(", ")}</div>`).join("");
   return h+"</div>"}
+
+/* ===== Stats: records, seed value, bidder habits, team pages, upsets (finished years only) ===== */
+let ST=null,stab="rec",sopen=null,sbid="",steam="";
+const RR=["Lost in the Round of 64","Lost in the Round of 32","Lost in the Sweet 16","Lost in the Elite 8","Lost in the Final Four","Runner-up","Champion"];
+const RS=["R64","R32","S16","E8","F4","2nd","🏆"];
+function statsData(){if(ST)return ST;const keep={DATA,BID,S},cum=[0];CFG.pay.forEach((p,i)=>cum.push(cum[i]+p));const lots=[],teams=[],yrs=[];
+  for(const y of Object.keys(YEARS).sort()){if(YEARS[y].espn)continue;const D=yearData(y);DATA=D;mkBid([]);calc();if(!S.champ)continue;
+    const tm=S.tm,tot=tm.reduce((a,t)=>a+(t.bid||0),0),earn=t=>tot*cum[Math.min(t.w,6)]/100;yrs.push({y,tot,champ:S.champ.n,champOwn:S.champ.own,champBid:0});
+    for(const l of S.lots){const won=l.sl.reduce((a,t)=>a+earn(t),0),bund=l.seeds.length>1;
+      const lot={y,reg:l.reg,seed:bund?"13–16":String(l.seeds[0]),sn:l.seeds[0],team:bund?`${l.reg} 13–16`:l.sl[0].n,own:l.own,bid:l.bid,won,wins:Math.max(...l.sl.map(t=>t.w)),tot,champ:l.sl.includes(S.champ)};
+      lots.push(lot);if(lot.champ)yrs[yrs.length-1].champBid=l.bid;
+      const slot=D.slots.filter(x=>x.reg===l.reg&&l.seeds.includes(x.s));
+      slot.forEach(sl=>sl.teams.forEach(t=>{const pl=/^l/i.test(t.pi||"");teams.push({y,team:t.n,seed:sl.s,reg:sl.reg,own:l.own,bid:l.bid/l.sl.length,won:pl?0:earn({w:t.w}),wins:pl?-1:t.w,pi:!!t.pi,bund})}))}}
+  DATA={lots:[...new Set(lots.map(l=>l.own))].map(n=>({own:n}))};mkBid([]);const look={};BID.forEach(b=>{const m=MASTER.find(x=>x[0]===b.n);if(m){b.c=m[1];b.fg=fgOf(m[1])}look[b.n]=b});
+  DATA=keep.DATA;BID=keep.BID;S=keep.S;return ST={lots,teams,yrs,look}}
+const SF=n=>"$"+Math.round(n).toLocaleString(),SG=n=>{n=Math.round(n);return(n<0?"−":n>0?"+":"")+SF(Math.abs(n))},SC=n=>Math.round(n)<0?"#d33":Math.round(n)>0?"#2a9d4b":"inherit";
+const SP=x=>(x>=0?"+":"")+Math.round(x*100)+"%";
+const tagS=(n,L)=>{const b=L[n];return b?`<span class="dt" style="background:${b.c};color:${b.fg}">${b.tag}</span>`:`<span class="dt" style="background:#8b95a3;color:#fff">—</span>`};
+const topsS=(a,f)=>{if(!a.length)return[];const v=a.map(f),m=Math.max(...v);return a.filter((_,i)=>v[i]===m)};
+const card=(title,body,right="")=>`<div class="sc"><div class="sch"><span>${title}</span><span>${right}</span></div>${body}</div>`;
+function recHTML(D){const L=D.look,lots=D.lots.filter(l=>l.bid>0);
+  const row=(n,main,val,sub)=>`<div class="sr">${tagS(n,L)}<div class="srm"><b>${main}</b>${sub?`<small>${sub}</small>`:""}</div><b class="srv">${val}</b></div>`;
+  const rec=(lab,list,f)=>!list.length?"":`<div class="srl">${lab}${list.length>1?` · ${list.length}-way tie`:""}</div>`+list.map(x=>{const[n,m,v,sb]=f(x);return row(n,m,v,sb)}).join("");
+  const ny={};D.lots.forEach(l=>{const k=l.own+"|"+l.y;const o=ny[k]||(ny[k]={own:l.own,y:l.y,sp:0,won:0});o.sp+=l.bid;o.won+=l.won});const NY=Object.values(ny).map(o=>Object.assign(o,{net:Math.round(o.won)-Math.round(o.sp)}));
+  const ch={};D.yrs.forEach(y=>{if(y.champOwn)(ch[y.champOwn]=ch[y.champOwn]||[]).push(y)});const CH=Object.entries(ch).map(([n,a])=>({n,a}));
+  let h=rec("Best buy",topsS(lots,l=>Math.round(l.won/l.bid*10)),l=>[l.own,`${l.team} <small>(${l.seed}) ’${l.y.slice(2)}</small>`,`${(l.won/l.bid).toFixed(1)}×`,`${SF(l.bid)} → ${SF(l.won)} · ${RR[Math.min(l.wins,6)]}`]);
+  h+=rec("Biggest bust",topsS(lots.filter(l=>Math.round(l.won)===0),l=>l.bid),l=>[l.own,`${l.team} <small>(${l.seed}) ’${l.y.slice(2)}</small>`,SF(l.bid),"didn't win a game"]);
+  h+=rec("Best single year",topsS(NY,o=>o.net),o=>[o.own,`${L[o.own].d} · ${o.y}`,SG(o.net),`${SF(o.sp)} paid → ${SF(o.won)} won`]);
+  h+=rec("Worst single year",topsS(NY,o=>-o.net),o=>[o.own,`${L[o.own].d} · ${o.y}`,SG(o.net),`${SF(o.sp)} paid → ${SF(o.won)} won`]);
+  h+=rec("Most champions owned",topsS(CH,c=>c.a.length),c=>[c.n,L[c.n].d,"🏆".repeat(c.a.length),c.a.map(y=>`${y.champ} ’${y.y.slice(2)}`).join(", ")]);
+  const cy=D.yrs.filter(y=>y.champOwn);
+  h+=rec("Priciest champion",topsS(cy,y=>y.champBid),y=>[y.champOwn,`${y.champ} · ${y.y}`,SF(y.champBid),""]);
+  h+=rec("Cheapest champion",topsS(cy,y=>-y.champBid),y=>[y.champOwn,`${y.champ} · ${y.y}`,SF(y.champBid),""]);
+  const potRow=y=>`<div class="sr"><span class="dt" style="background:var(--seg);color:var(--fg)">’${y.y.slice(2)}</span><div class="srm"><b>${y.y} pot</b><small>${y.champ} won it</small></div><b class="srv">${SF(y.tot)}</b></div>`;
+  h+=`<div class="srl">Biggest pot</div>`+topsS(D.yrs,y=>y.tot).map(potRow).join("")+`<div class="srl">Smallest pot</div>`+topsS(D.yrs,y=>-y.tot).map(potRow).join("");
+  return card("Records",h,"ties all shown")}
+function seedHTML(D){const order=["1","2","3","4","5","6","7","8","9","10","11","12","13–16"],by={};D.lots.forEach(l=>{(by[l.seed]=by[l.seed]||[]).push(l)});
+  const rows=order.filter(k=>by[k]).map(k=>{const a=by[k],bid=a.reduce((s,l)=>s+l.bid,0),won=a.reduce((s,l)=>s+l.won,0),ps=a.map(l=>l.bid),deep=a.filter(l=>l.wins>=2).length;return{k,n:a.length,avg:bid/a.length,lo:Math.min(...ps),hi:Math.max(...ps),roi:won/bid-1,deep}});
+  const mx=Math.max(...rows.map(r=>Math.abs(r.roi)));
+  let h=`<div class="tw" style="max-height:none"><table class="atg"><thead><tr><th class="c1">Seed</th><th>Avg price</th><th>Range</th><th>S16+</th><th>ROI</th></tr></thead><tbody>`+rows.map(r=>`<tr><td class="c1"><b>${r.k}</b></td><td>${SF(r.avg)}</td><td style="color:var(--mut)">${SF(r.lo)}–${SF(r.hi)}</td><td>${r.deep}/${r.n}</td><td style="color:${SC(r.roi)}">${SP(r.roi)}</td></tr>`).join("")+`</tbody></table></div>`;
+  h+=`<div class="sub" style="margin:10px 2px 6px">Return by seed</div>`+rows.map(r=>`<div class="hbr"><span>${r.k}</span><div class="hbt"><i class="mid"></i><i class="fill" style="${r.roi>=0?"left:50%":"right:50%"};width:${Math.abs(r.roi)/mx*50}%;background:${r.roi>=0?"#2a9d4b":"#d33"}"></i></div><b style="color:${SC(r.roi)}">${SP(r.roi)}</b></div>`).join("");
+  h+=`<div class="note2">“S16+” = lots that reached the Sweet 16. ROI = money won ÷ money paid for that seed line, all years combined. Use the average price and range as a price guide for next March.</div>`;
+  let h2=D.yrs.slice().reverse().map(y=>{const s1=D.lots.filter(l=>l.y===y.y&&l.seed==="1"),v=s1.reduce((a,l)=>a+l.bid,0),pc=v/y.tot;return`<div class="hbr"><span>${y.y}</span><div class="hbt"><i class="fill" style="left:0;width:${pc*100*2}%;background:var(--acc)"></i></div><b>${Math.round(pc*100)}%</b></div><div class="sub" style="margin:-2px 0 6px 46px">${SF(v)} of ${SF(y.tot)} on the four 1 seeds</div>`}).join("");
+  return card("Seed value",h)+card("Share of the pot spent on 1 seeds",h2)}
+function bidHTML(D){const L=D.look,names=Object.keys(L).sort((a,b)=>L[a].d.localeCompare(L[b].d));
+  const yrsOf={};D.lots.forEach(l=>{(yrsOf[l.own]=yrsOf[l.own]||new Set()).add(l.y)});
+  // go-to seed lines
+  const gs=[];names.forEach(n=>{const c={};D.lots.filter(l=>l.own===n).forEach(l=>{c[l.seed]=c[l.seed]||new Set();c[l.seed].add(l.y)});Object.entries(c).forEach(([k,v])=>{if(v.size>=2)gs.push({n,k,c:v.size,of:yrsOf[n].size})})});
+  gs.sort((a,b)=>b.c-a.c||b.c/b.of-a.c/a.of||(a.k==="13–16"?99:+a.k)-(b.k==="13–16"?99:+b.k));
+  let h=gs.slice(0,15).map(g=>`<div class="sr">${tagS(g.n,L)}<div class="srm"><b>${g.k==="13–16"?"13–16 bundle":g.k+" seed"}</b><small>${L[g.n].d} · ${g.c} of ${g.of} years played</small></div><b class="srv">${g.c}/${g.of}</b></div>`).join("")||`<div class="sub">No repeats yet.</div>`;
+  // go-to teams
+  const gt={};D.teams.filter(t=>!t.bund).forEach(t=>{const k=t.own+"|"+t.team;const o=gt[k]||(gt[k]={n:t.own,team:t.team,c:0,sp:0,won:0,ys:[]});o.c++;o.sp+=t.bid;o.won+=t.won;o.ys.push(t)});
+  const GT=Object.values(gt).filter(o=>o.c>=2).sort((a,b)=>b.c-a.c||b.won-a.won);
+  let h2=GT.map(o=>{const k="gt|"+o.n+"|"+o.team,op=sopen===k;return`<div class="sr tapp" onclick="sop('${k.replace(/'/g,"\\'")}')">${tagS(o.n,L)}<div class="srm"><b>${o.team}</b><small>${L[o.n].d} · ${o.c} times · ${SF(o.sp)} paid · ${SF(o.won)} won</small></div><b class="srv" style="color:${SC(o.won-o.sp)}">${SG(o.won-o.sp)}</b></div>${op?yearRows(o.ys,L):""}`}).join("")||`<div class="sub">Nobody has bought the same team twice yet.</div>`;
+  // profile
+  const sel=sbid&&L[sbid]?sbid:"";let h3=`<select class="sel" style="width:100%;margin-bottom:8px" onchange="sbd(this.value)"><option value="">Pick a bidder…</option>${names.map(n=>`<option value="${n}"${n===sel?" selected":""}>${L[n].d} · ${L[n].tag}</option>`).join("")}</select>`;
+  if(sel){const my=D.lots.filter(l=>l.own===sel),sp=my.reduce((a,l)=>a+l.bid,0),won=my.reduce((a,l)=>a+l.won,0),paid=my.filter(l=>l.bid>0);
+    const best=topsS(paid,l=>Math.round(l.won-l.bid)),worst=topsS(paid,l=>-Math.round(l.won-l.bid)),fav={};my.forEach(l=>fav[l.seed]=(fav[l.seed]||0)+1);
+    const favs=Object.entries(fav).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,c])=>`${k==="13–16"?"13–16":k+" seed"} ×${c}`).join(" · ");
+    const titles=D.yrs.filter(y=>y.champOwn===sel);
+    h3+=`<div class="tiles2"><div><small>Net</small><b style="color:${SC(won-sp)}">${SG(won-sp)}</b></div><div><small>ROI</small><b>${SP(won/sp-1)}</b></div><div><small>Years</small><b>${yrsOf[sel].size}</b></div><div><small>Titles</small><b>${titles.length?"🏆".repeat(titles.length):"—"}</b></div></div>`;
+    h3+=`<div class="sub" style="margin:8px 2px 4px">Favorite seeds: ${favs}</div>`;
+    h3+=`<div class="sub" style="margin:0 2px 4px">Best buy: ${best.map(l=>`${l.team} ’${l.y.slice(2)} (${SG(l.won-l.bid)})`).join(", ")}</div><div class="sub" style="margin:0 2px 8px">Worst buy: ${worst.map(l=>`${l.team} ’${l.y.slice(2)} (${SG(l.won-l.bid)})`).join(", ")}</div>`;
+    h3+=Object.keys(YEARS).sort().reverse().filter(y=>yrsOf[sel].has(y)).map(y=>{const a=my.filter(l=>l.y===y),p=a.reduce((s,l)=>s+l.bid,0),w=a.reduce((s,l)=>s+l.won,0);
+      return`<div class="yrh"><b>${y}</b><span>${SF(p)} paid · ${SF(w)} won</span><b style="color:${SC(w-p)}">${SG(w-p)}</b></div>`+a.sort((x,z)=>z.won-x.won||z.bid-x.bid).map(l=>`<div class="yrr"><i></i><span>${l.team} <small>(${l.seed})</small></span><small>${RS[Math.min(Math.max(l.wins,0),6)]}</small><span>${SF(l.bid)}</span><span style="color:${SC(l.won-l.bid)}">${SG(l.won-l.bid)}</span></div>`).join("")}).join("")}
+  return card("Go-to seeds",h)+card("Go-to teams",h2,"tap for each year")+card("Bidder profile",h3)}
+function yearRows(ys,L){return`<div class="drill">`+ys.slice().sort((a,b)=>b.y-a.y).map(t=>`<div class="yrr">${tagS(t.own,L)}<span>${t.y} · ${t.seed} seed${t.pi?" (play-in)":""}</span><small>${t.wins<0?"Lost First Four":RS[Math.min(t.wins,6)]}</small><span>${SF(t.bid)}</span><span style="color:${SC(t.won-t.bid)}">${SG(t.won-t.bid)}</span></div>`).join("")+`</div>`}
+function teamHTML(D){const L=D.look,q=steam.trim().toLowerCase(),T={};D.teams.forEach(t=>{const o=T[t.team]||(T[t.team]={team:t.team,ys:[],sp:0,won:0,best:-1,titles:0,own:new Set()});o.ys.push(t);o.sp+=t.bid;o.won+=t.won;o.best=Math.max(o.best,t.wins);if(t.wins===6)o.titles++;o.own.add(t.own)});
+  let A=Object.values(T).filter(o=>!q||o.team.toLowerCase().includes(q)).sort((a,b)=>b.won-a.won||b.ys.length-a.ys.length||a.team.localeCompare(b.team));
+  const all=q||sopen==="tall";const shown=all?A:A.slice(0,40);
+  let h=`<input class="sel" style="width:100%;margin-bottom:8px" placeholder="Search teams…" value="${steam.replace(/"/g,"&quot;")}" oninput="stm(this.value)" id="tq">`;
+  h+=`<div id="tlist">`+shown.map(o=>{const k="tm|"+o.team,op=sopen===k;return`<div class="sr tapp" onclick="sop('${k.replace(/'/g,"\\'")}')"><span class="dt" style="background:var(--seg);color:var(--fg)">${o.ys.length}×</span><div class="srm"><b>${o.team}${o.titles?" "+"🏆".repeat(o.titles):""}</b><small>${o.own.size} owner${o.own.size===1?"":"s"} · best: ${o.best<0?"First Four":RS[Math.min(o.best,6)]} · ${SF(o.sp)} paid</small></div><b class="srv" style="color:${SC(o.won-o.sp)}">${SF(o.won)}</b></div>${op?yearRows(o.ys,L):""}`}).join("")+(shown.length<A.length?`<button class="tab" style="width:100%;margin-top:6px;background:var(--seg)" onclick="sop('tall')">Show all ${A.length} teams</button>`:"")+`</div>`;
+  return card("Teams",h,"sorted by money paid out")+`<div class="note2">Each team's paid amount is its share of the lot (a 13–16 bundle splits four ways). Tap a team for every year.</div>`}
+function upsetHTML(D){const L=D.look;
+  let h=D.yrs.slice().reverse().map(y=>{const a=D.lots.filter(l=>l.y===y.y&&(l.seed==="13–16"||+l.seed>=9)),w=a.reduce((s,l)=>s+l.won,0),top=a.filter(l=>l.won>0).sort((x,z)=>z.won-x.won).slice(0,3);
+    return`<div class="yrh"><b>${y.y}</b><span>${Math.round(w/y.tot*100)}% of the pot went to 9 seeds and worse</span><b>${SF(w)}</b></div>`+(top.map(l=>`<div class="yrr">${tagS(l.own,L)}<span>${l.team} <small>(${l.seed})</small></span><small>${RS[Math.min(l.wins,6)]}</small><span>${SF(l.bid)}</span><span style="color:${SC(l.won-l.bid)}">${SF(l.won)}</span></div>`).join("")||`<div class="sub" style="margin:4px 0 8px">No Cinderellas cashed in.</div>`)}).join("");
+  const pi=D.teams.filter(t=>t.pi).sort((a,b)=>b.y-a.y||b.wins-a.wins);
+  let h2=pi.map(t=>`<div class="yrr">${tagS(t.own,L)}<span>${t.team} <small>${t.y} · ${t.reg} ${t.seed}</small></span><small>${t.wins<0?"Lost First Four":t.wins===0?"Lost R64":RS[Math.min(t.wins,6)]}</small><span></span><span style="color:${SC(t.won)}">${t.won?SF(t.won):"—"}</span></div>`).join("");
+  return card("Cinderella payouts",h,"9 seeds and worse")+card("Play-in luck",h2,"both teams belong to the seed's buyer")}
+function statsHTML(){const D=statsData();const T=[["rec","Records"],["seed","Seeds"],["bid","Bidders"],["team","Teams"],["ups","Upsets"]];
+  const body=stab==="seed"?seedHTML(D):stab==="bid"?bidHTML(D):stab==="team"?teamHTML(D):stab==="ups"?upsetHTML(D):recHTML(D);
+  return`<div style="flex:1;min-width:0"><div class="tabs">${T.map(([k,n])=>`<button class="tab${stab===k?" on":""}" onclick="stb('${k}')">${n}</button>`).join("")}</div>${body}</div>`}
+const stb=k=>{stab=k;sopen=null;render()},sop=k=>{sopen=sopen===k?null:k;render()},sbd=v=>{sbid=v;render()};
+const stm=v=>{steam=v;const D=statsData();const el=document.getElementById("tlist");if(!el)return;const tmp=document.createElement("div");tmp.innerHTML=teamHTML(D);const nl=tmp.querySelector("#tlist");if(nl)el.innerHTML=nl.innerHTML};
 function yearData(y){const Y=YEARS[y];const slots=Y.slots.map(([reg,s,ts])=>({reg,s,teams:ts.map(([n,w,pi])=>({n,w,pi}))}));
   const lots=Y.lots.map(([reg,sd,own,bid])=>({reg,seeds:rng(sd),own,bid}));
   const sched=(Y.sched||[]).map(([d,t,net,a,b,r,sc])=>({d,t,net,a,b,r,sc}));return{slots,lots,extra:[],sched}}
@@ -276,13 +389,13 @@ const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<di
 return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
 const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
-const yk=Object.keys(YEARS).sort().reverse();$("yrs").style.display=yk.length>1?"":"none";$("yrs").innerHTML=yk.map(y=>`<button class="tab${y===YR&&view!=="alltime"?" on":""}" onclick="setYear('${y}')">${y}</button>`).join("")+`<button class="tab at${view==="alltime"?" on":""}" onclick="vw('alltime')">All-Time</button>`;
-$("view").style.display=view==="alltime"?"none":"";
+const yk=Object.keys(YEARS).sort().reverse();$("yrs").style.display=yk.length>1?"":"none";$("yrs").innerHTML=yk.map(y=>`<button class="tab${y===YR&&view!=="alltime"?" on":""}" onclick="setYear('${y}')">${y}</button>`).join("")+`<button class="tab at${view==="alltime"?" on":""}" onclick="vw('alltime')">All-Time</button><button class="tab at${view==="stats"?" on":""}" onclick="vw('stats')">Stats</button>`;
+$("view").style.display=view==="alltime"||view==="stats"?"none":"";
 const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
 $("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
-if(view==="alltime")h=allHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
+if(view==="alltime")h=allHTML();else if(view==="stats")h=statsHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
 for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
