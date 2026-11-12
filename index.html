@@ -101,6 +101,7 @@ select{font:13px var(--ui);padding:4px 6px;border-radius:7px;border:1px solid va
 .sgt em.w{color:var(--fg)}
 .sgh b.lv{color:#e0242f}
 .tabs.yrs{margin-bottom:8px}
+.tabs.yrs .tab.at{margin-left:auto;font-weight:700}
 table.atg{border-collapse:collapse;width:100%;font:600 12px var(--ui);font-variant-numeric:tabular-nums}
 table.atg th,table.atg td{padding:6px 3px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 table.atg th{font:600 11px var(--ui);color:var(--mut)}
@@ -109,7 +110,6 @@ table.atg .c1{text-align:left;width:1%}
 .foot{text-align:center;margin:14px 0 4px;font-size:11px}</style></head>
 <body><div class="wrap">
 <div class="hero"><h1>Oak Street <span>Auctions</span></h1><a class="home" href="/" aria-label="All Oak Street auctions" title="All auctions"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg></a></div>
-<details class="opt"><summary><u>Options</u></summary><div class="ctl"><label><input type="checkbox" id="t3">3-letter tags</label><span id="demo">Demo results through <select id="rd"><option value="0">Start</option><option value="1">Round of 64</option><option value="2">Round of 32</option><option value="3" selected>Sweet 16</option><option value="4">Elite Eight</option><option value="5">Final Four</option><option value="6">Championship</option></select></span></div></details>
 <div class="tabs sm yrs" id="yrs"></div>
 <div class="tabs top" id="view"></div>
 <div class="tabs" id="tabs"></div>
@@ -182,7 +182,7 @@ function espnBuild(j,order){
   const over=G.some(g=>g.rnd==="National Championship"&&g.done);
   return{slots,sched,over,any:G.length}}
 let ESPN_YEAR=null,YR=null;
-function setYear(y,first){if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
+function setYear(y,first){if(view==="alltime")view="bracket";if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
   try{history.replaceState(null,"",y===Object.keys(YEARS).sort().pop()?location.pathname:"?year="+y)}catch(e){}
   const force=first&&/[?&]espn=1/.test(location.search);
   if(YEARS[y].espn||force){DATA=DATA||null;$("st").textContent="Loading from ESPN…";loadESPN(y);ESPN_YEAR=setInterval(()=>{if(document.visibilityState==="visible")loadESPN(y)},CFG.refreshSec*1000)}
@@ -276,9 +276,10 @@ const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<di
 return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
 const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
-const yk=Object.keys(YEARS).sort().reverse();$("yrs").style.display=yk.length>1?"":"none";$("yrs").innerHTML=yk.map(y=>`<button class="tab${y===YR?" on":""}" onclick="setYear('${y}')">${y}</button>`).join("");
+const yk=Object.keys(YEARS).sort().reverse();$("yrs").style.display=yk.length>1?"":"none";$("yrs").innerHTML=yk.map(y=>`<button class="tab${y===YR&&view!=="alltime"?" on":""}" onclick="setYear('${y}')">${y}</button>`).join("")+`<button class="tab at${view==="alltime"?" on":""}" onclick="vw('alltime')">All-Time</button>`;
+$("view").style.display=view==="alltime"?"none":"";
 const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
-$("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[]),...(Object.keys(YEARS).length>1?[["alltime","All-Time"]]:[])].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
+$("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
 if(view==="alltime")h=allHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
@@ -303,8 +304,6 @@ let sched=null;if(CFG.schedule){try{const Z=await get(CFG.schedule),zh=Z[0].map(
 sched=Z.slice(1).map(r=>({d:gv(r,0),t:gv(r,1),net:gv(r,2),a:gv(r,3),b:gv(r,4),r:gv(r,5),sc:gv(r,6)})).filter(g=>g.d&&(g.a||g.b))}catch(e){}}
 DATA={slots,lots,extra,sched};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
 catch(e){$("st").textContent=DATA?"Offline — showing last update":"Can't load the sheet — check the link"}}
-$("rd").onchange=e=>{up=+e.target.value;render()};
-$("t3").onchange=e=>{T3=e.target.checked;mkBid(DATA.extra);render()};
-if(live){$("demo").style.display="none";$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
-else{up=9;$("demo").style.display="none";const q=(location.search.match(/[?&]year=(\d{4})/)||[])[1];setYear(YEARS[q]?q:Object.keys(YEARS).sort().pop(),1)}
+if(live){$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
+else{up=9;const q=(location.search.match(/[?&]year=(\d{4})/)||[])[1];setYear(YEARS[q]?q:Object.keys(YEARS).sort().pop(),1)}
 </script></body></html>
