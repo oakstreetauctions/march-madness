@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b2d5b">
 <title>Oak Street Auctions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,800&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f2f3f6;--fg:#0a0a0a;--card:#fff;--line:#dfe2e8;--mut:#6a7280;--seg:#e3e5ea;--sel:#fff;--blue:#009cde;--acc:#0a4c8f;--body:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--ui:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,"Segoe UI",sans-serif}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
@@ -136,11 +137,48 @@ table.atg th,table.atg td{padding:6px 3px;text-align:right;border-bottom:1px sol
 table.atg th{font:600 11px var(--ui);color:var(--mut)}
 table.atg .c1{text-align:left;width:1%}
 .sgt.lost span{color:var(--mut)}
-.foot{text-align:center;margin:14px 0 4px;font-size:11px}</style></head>
-<body><div class="wrap">
-<div class="hero"><h1>Oak Street <span>Auctions</span></h1><a class="home" href="/" aria-label="All Oak Street auctions" title="All auctions"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg></a></div>
-<div class="tabs sm yrs" id="yrs"></div>
-<div class="tabs top" id="view"></div>
+.foot{text-align:center;margin:14px 0 4px;font-size:11px}
+/* ===== shared Oak Street shell (matches the golf site): header, hamburger menu, year picker, nav ===== */
+:root{padding-top:0;--bg:#f6f4ec;--fg:#1c2a21;--card:#fff;--line:#e6e2d4;--mut:#6d7468;--seg:#ebe7da;--row:#faf9f4;--ui:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--serif:"Libre Caslon Text",Georgia,serif;--hdr:#0b2d5b;--hdrfg:#fff;--gold:#f2c94c;--acc:#0b2d5b}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a0e14;--fg:#eef1f5;--card:#131922;--line:#252e3a;--mut:#949eab;--seg:#1a212b;--row:#161d27;--sel:#2c3644;--hdr:#071d3b;--acc:#6aa8ff}}
+:root[data-theme="dark"]{--bg:#0a0e14;--fg:#eef1f5;--card:#131922;--line:#252e3a;--mut:#949eab;--seg:#1a212b;--row:#161d27;--sel:#2c3644;--hdr:#071d3b;--acc:#6aa8ff}
+header{position:relative;background:var(--hdr);color:var(--hdrfg);padding:calc(env(safe-area-inset-top,0px) + 18px) 48px 14px;text-align:center}
+header h1{margin:0;font:400 27px/1.1 var(--serif);letter-spacing:.06em;text-transform:none;cursor:pointer;color:inherit}
+@media (max-width:460px){header h1{font-size:clamp(17px,5.4vw,23px);letter-spacing:.04em;white-space:nowrap}}
+header .rule{width:44px;height:1px;background:var(--gold);margin:10px auto 0;opacity:.9}
+.burger{position:absolute;left:10px;top:calc(env(safe-area-inset-top,0px) + 14px);width:40px;height:40px;border:0;background:none;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:6px}
+.burger:hover{background:rgba(255,255,255,.1)}.burger svg{width:22px;height:22px}
+.evpick{position:relative;display:inline-flex;align-items:center;gap:7px;margin-top:9px;padding:4px 12px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font:600 11px var(--ui);letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.evpick .car3{font-size:9px;opacity:.85}.evpick.plain{border:0;padding:0;margin-top:8px;opacity:.9}
+.evpick select{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:16px}
+nav{position:sticky;top:0;z-index:5;background:var(--hdr);display:flex;padding:0 8px;justify-content:center;border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+nav button{flex:1 1 0;max-width:160px;appearance:none;border:0;background:none;color:rgba(255,255,255,.66);font:600 11.5px var(--ui);letter-spacing:.11em;text-transform:uppercase;padding:13px 2px 11px;border-bottom:2px solid transparent;cursor:pointer}
+nav button:hover{color:#fff}nav button.on{color:#fff;border-bottom-color:var(--gold)}
+.wrap{padding-top:12px}
+.drawer{position:fixed;inset:0;z-index:60;display:none}.drawer.on{display:block}
+.drawer-bg{position:absolute;inset:0;background:rgba(10,20,30,.45);animation:fade .15s}
+.drawer-card{position:absolute;left:0;top:0;bottom:0;width:min(330px,88vw);background:var(--bg);overflow:auto;box-shadow:6px 0 30px rgba(0,0,0,.25);animation:slide .2s ease-out;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:none}}@keyframes fade{from{opacity:0}to{opacity:1}}
+.dr-head{background:var(--hdr);color:var(--hdrfg);padding:calc(env(safe-area-inset-top,0px) + 18px) 16px 16px;display:flex;align-items:center;justify-content:space-between}
+.dr-head b{font:400 19px var(--serif);letter-spacing:.05em}
+.dr-head button{border:0;background:none;color:inherit;font-size:18px;cursor:pointer;width:36px;height:36px}
+.dr-link{text-decoration:none;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);text-align:left;padding:11px 16px;font:600 14px var(--ui);cursor:pointer;border-left:3px solid transparent}
+.dr-link:hover{background:var(--row)}.dr-link.on{border-left-color:var(--acc);background:var(--row)}
+.dr-link .ic{width:20px;display:flex;justify-content:center;color:var(--acc)}
+.dr-div{display:flex;align-items:center;gap:10px;padding:12px 16px 2px;font:600 9.5px var(--ui);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.dr-div::after{content:"";flex:1;height:1px;background:var(--line)}
+.dr-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 16px 8px}
+.dr-cell{height:34px;border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:4px;background:var(--card);color:var(--fg);font:600 12.5px var(--ui);cursor:pointer;padding:0}
+.dr-cell:hover{background:var(--row)}.dr-cell.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sc{border-radius:4px;box-shadow:0 1px 2px rgba(28,42,33,.06),0 4px 14px rgba(28,42,33,.04)}
+.sch{font:400 15px var(--serif);color:var(--acc);text-transform:none;letter-spacing:0}
+.sch span:last-child{font:600 10.5px var(--ui);letter-spacing:.12em;text-transform:uppercase}
+</style></head>
+<body>
+<header><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('bracket')">Oak Street Auctions</h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
+<nav id="nav"></nav>
+<div class="drawer" id="drawer"><div class="drawer-bg" onclick="dr(0)"></div><div class="drawer-card" id="drawerCard" role="dialog" aria-label="Menu"></div></div>
+<div class="wrap">
 <div class="tabs" id="tabs"></div>
 <div class="bracket" id="br"></div>
 <div class="sub foot" id="st"></div>
@@ -390,10 +428,14 @@ const cards=G.filter(g=>g.d===sday).sort((x,y)=>mins(x.t)-mins(y.t)).map(g=>`<di
 return`<div style="flex:1;min-width:0"><div class="sbar"><select class="sel" onchange="swo(this.value)"><option value="">All teams</option>${BID.slice().sort((x,y)=>x.d.localeCompare(y.d)).map(b=>`<option value="${b.n}"${b.n===swho?" selected":""}>${b.d} · ${b.tag}</option>`).join("")}</select></div><div class="tabs">${dk.map(d=>`<button class="tab${d===sday?" on":""}" onclick="sdy(decodeURIComponent('${encodeURIComponent(d).replace(/'/g,"%27")}'))">${dl(d)}</button>`).join("")}</div><div class="sgl">${cards}</div></div>`};
 const stand=()=>{const rows=BID.map((b,i)=>{const ts=tm.filter(t=>t.b===i),sp=ts.reduce((a,t)=>a+(t.bid||0),0),won=ts.reduce((a,t)=>a+earn(t),0);return{b,sp,won,al:ts.filter(t=>!L.has(t)).length,n:ts.length}}).sort((x,y)=>(y.won-y.sp)-(x.won-x.sp)||y.won-x.won),lab=["R64","R32","Sweet 16","Elite 8","Final Four","Title"];
 return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won minus paid). Pays per win, % of pot: ${CFG.pay.map((p,i)=>lab[i]+" "+p+"%").join(" · ")}</div>`+rows.map((r,i)=>`<div class="g" style="flex-direction:row;align-items:center;gap:8px;min-height:0;padding:8px"><b style="width:20px">${i+1}</b><span class="dt" style="background:${r.b.c};color:${r.b.fg}">${r.b.tag}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.b.d}<br><small style="color:var(--mut)">${r.al}/${r.n} alive · paid ${fm(r.sp)}</small></span><span style="text-align:right"><b style="color:${Math.round(r.won-r.sp)<0?"#d33":Math.round(r.won-r.sp)>0?"#2a9d4b":"inherit"}">${Math.round(r.won-r.sp)<0?"−":Math.round(r.won-r.sp)>0?"+":""}${fm(Math.abs(r.won-r.sp))}</b><br><small style="color:var(--mut)">won ${fm(r.won)}</small></span></div>`).join("")+"</div>"};
-const yk=Object.keys(YEARS).sort().reverse();$("yrs").style.display=yk.length>1?"":"none";$("yrs").innerHTML=yk.map(y=>`<button class="tab${y===YR&&view!=="alltime"?" on":""}" onclick="setYear('${y}')">${y}</button>`).join("")+`<button class="tab at${view==="alltime"?" on":""}" onclick="vw('alltime')">All-Time</button><button class="tab at${view==="stats"?" on":""}" onclick="vw('stats')">Stats</button>`;
-$("view").style.display=view==="alltime"||view==="stats"?"none":"";
+const yk=Object.keys(YEARS).sort().reverse(),side=view==="alltime"||view==="stats";
+$("evpick").className="evpick"+(side?" plain":"");
+$("evpick").innerHTML=side?`<span>${view==="alltime"?"All-Time Standings":"Stats &amp; Records"}</span>`:`<span>${YR} Tournament</span>${yk.length>1?`<span class="car3">▾</span><select aria-label="Pick a year" onchange="setYear(this.value)">${yk.map(y=>`<option value="${y}"${y===YR?" selected":""}>${y} Tournament</option>`).join("")}</select>`:""}`;
+$("nav").style.display=side?"none":"";
 const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
-$("view").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction Info"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="tab${view===k?" on":""}" onclick="vw('${k}')">${n}</button>`).join("");$("tabs").style.display=view!=="bracket"?"none":"";
+$("nav").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="${view===k?"on":""}" onclick="vw('${k}')">${n}</button>`).join("");
+if($("drawer").classList.contains("on"))drawDr();
+$("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
 if(view==="alltime")h=allHTML();else if(view==="stats")h=statsHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
@@ -401,7 +443,20 @@ for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c]
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
 $("br").innerHTML=h}
-const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render()},srt=k=>{asort=k;render()},sdy=k=>{sday=k;render()},swo=v=>{swho=v;render()};
+const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render();if(k==='alltime'||k==='stats')scrollTo(0,0)},srt=k=>{asort=k;render()},sdy=k=>{sday=k;render()},swo=v=>{swho=v;render()};
+
+/* ===== hamburger menu (same layout as the golf site) ===== */
+function drawDr(){const side=view==="alltime"||view==="stats",yk=Object.keys(YEARS).sort().reverse();
+  $("drawerCard").innerHTML=`<div class="dr-head"><b>Oak Street Auctions</b><button onclick="dr(0)" aria-label="Close menu">✕</button></div>
+  <button class="dr-link${!side?" on":""}" style="margin-top:8px" onclick="dr(0);vw('bracket')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18M5.6 5.6c3.5 3.5 3.5 9.3 0 12.8M18.4 5.6c-3.5 3.5-3.5 9.3 0 12.8"/></svg></span>${YR} Tournament</button>
+  <button class="dr-link${view==="alltime"?" on":""}" onclick="dr(0);vw('alltime')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg></span>All-Time Standings</button>
+  <button class="dr-link${view==="stats"?" on":""}" onclick="dr(0);vw('stats')"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stats &amp; Records</button>
+  <div class="dr-div"><span>Tournaments</span></div><div class="dr-grid">${yk.map(y=>`<button class="dr-cell${!side&&y===YR?" on":""}" onclick="dr(0);setYear('${y}')">${y}</button>`).join("")}</div>
+  <div class="dr-div" style="padding-top:20px"><span>Oak Street Auctions</span></div>
+  <a class="dr-link" href="/"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>All auctions</a>
+  <a class="dr-link" href="/majors/"><span class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21V3l11 4-11 4"/><path d="M3 21h10"/></svg></span>Golf Majors</a>`}
+function dr(on){if(on)drawDr();$("drawer").classList.toggle("on",!!on);document.body.style.overflow=on?"hidden":""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")dr(0)});
 function demoSched(slots){const by={};slots.forEach(s=>(by[s.reg]=by[s.reg]||{})[s.s]=s.teams.map(t=>t.n).join(" / "));
 const O=[1,16,8,9,5,12,4,13,6,11,3,14,7,10,2,15],TM=["12:15 PM","12:40 PM","2:45 PM","3:10 PM","6:50 PM","7:15 PM","9:20 PM","9:45 PM"],NT=["CBS","TBS","TNT","truTV"],o=[];
 Object.keys(by).forEach((r,ri)=>{for(let i=0;i<8;i++){const g=(ri%2)*8+i;o.push({d:ri<2?"3/20/2025":"3/21/2025",t:TM[g>>1],net:NT[g%4],r:"Round of 64",a:by[r][O[2*i]],b:by[r][O[2*i+1]]})}});return o}
