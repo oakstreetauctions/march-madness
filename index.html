@@ -209,7 +209,7 @@ const SFX={II:"2",III:"3",IV:"4",V:"5",JR:"J",SR:"S"};
 const prs=n=>{n=n.trim();const m=n.match(/^([A-Za-z'\- ]+?)\.\s*([A-Za-z]{1,3})\.?$/);let f,w;if(m){f=m[2];w=m[1].trim().split(/\s+/)}else{const p=n.split(/\s+/);f=p[0][0];w=[p[p.length-1]]}
 let sx="";if(w.length>1&&SFX[w[w.length-1].toUpperCase()])sx=w.pop().toUpperCase();return{f:f.toUpperCase(),l:w.join(" "),sx}};
 const cap=s=>s.toLowerCase().replace(/(^|[\s'-])\w/g,c=>c.toUpperCase());
-const disp=n=>{if(!/\.\s*[A-Za-z]{1,3}\.?$/.test(n.trim()))return n.trim();const p=prs(n);return(p.f.length>1?p.f+" ":p.f+". ")+cap(p.l)+(p.sx?" "+(/^[IV]+$/.test(p.sx)?p.sx:cap(p.sx)):"")};
+const disp=n=>n.trim().toUpperCase().replace(/\.\s*/,". "); // LAST. F, the same as the golf site
 const auto=(n,three)=>{const p=prs(n),l=p.l.replace(/[^A-Za-z]/g,"").toUpperCase();return three?p.f+(p.sx?l[0]+SFX[p.sx]:l.slice(0,2)):p.f+l[0]};
 function mkBid(extra){const m=new Map();(extra||[]).forEach(x=>m.set(x.n,x));DATA.lots.forEach(l=>{if(l.own&&!m.has(l.own))m.set(l.own,{n:l.own})});
 BID=[...m.values()].map(x=>Object.assign({},x));const two=BID.map(x=>auto(x.n,0)),cnt={};two.forEach(k=>cnt[k]=(cnt[k]||0)+1);
