@@ -170,6 +170,10 @@ nav button:hover{color:#fff}nav button.on{color:#fff;border-bottom-color:#009cde
 .dr-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:10px 16px 8px}
 .dr-cell{height:34px;border:1px solid var(--line);border-left:3px solid #009cde;border-radius:4px;background:var(--card);color:var(--fg);font:600 12.5px var(--ui);cursor:pointer;padding:0}
 .dr-cell:hover{background:var(--row)}.dr-cell.on{background:#009cde;border-color:#009cde;color:#fff}
+
+/* chip initials: optically centered. The condensed font sits its capitals ~.05em low and letter-spacing adds space after the last letter, so nudge both back */
+.dt{padding:calc(2px + .04em) 7px calc(2px - .04em)}
+.tg{padding:0 6px .04em;text-indent:.03em}.slot b,.slot.p1 b{padding:0 0 .055em;text-indent:.03em}.chip i{padding:0 6px .04em;text-indent:.03em}
 </style></head>
 <body>
 <header><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('bracket')">Oak Street <span>Auctions</span></h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
