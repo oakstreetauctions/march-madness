@@ -231,7 +231,12 @@ body{font-variant-ligatures:no-common-ligatures}
 .dsh .rw.h{cursor:default;font:600 10px var(--ui);letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}.dsh .rw.h:hover{background:none}
 .dsh .rw.dim{opacity:.4}.dsh .rw .t1{display:flex;align-items:center;gap:7px}.dsh .rw .t2{display:block;font:500 11px var(--ui);color:var(--mut);margin-top:2px}
 .dsh .nt{font:12px var(--ui);color:var(--mut);padding:10px 14px 0}
-</style></head>
+
+/* All-Time page theme */
+.atp{--at-a:#009cde;--at-th:#000;--at-thf:#fff;--at-f:var(--body);--pos:#2a9d4b;--neg:#d33;--at-shf:italic 800 18px var(--body)}
+.atp .atp-k{font:italic 800 24px var(--body);text-transform:uppercase}
+</style><link rel="stylesheet" href="/alltime.css">
+</head>
 <body>
 <header><a class="osh" href="/" aria-label="Oak Street Auctions home" title="Oak Street Auctions home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg></a><button class="burger" id="burger" aria-label="Open menu" onclick="dr(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 onclick="vw('home')">Oak Street <span>Auctions</span></h1><div class="rule"></div><div class="evpick" id="evpick"></div></header>
 <nav id="nav"></nav>
@@ -241,6 +246,7 @@ body{font-variant-ligatures:no-common-ligatures}
 <div class="bracket" id="br"></div>
 <div class="sub foot" id="st"></div>
 </div>
+<script src="/alltime.js"></script>
 <script>
 /* ===== SETUP: paste Google Sheet "Publish to web" CSV links (File > Share > Publish to web > pick a tab > CSV) =====
    teams   : Region, Seed, Team, Playin (W or L, only for play-in teams), Wins   (one row per team; play-in seeds get two rows)
@@ -416,7 +422,7 @@ function bidHTML(D){const L=D.look,names=Object.keys(L).sort((a,b)=>L[a].d.local
     h3+=Object.keys(YEARS).sort().reverse().filter(y=>yrsOf[sel].has(y)).map(y=>{const a=my.filter(l=>l.y===y),p=a.reduce((s,l)=>s+l.bid,0),w=a.reduce((s,l)=>s+l.won,0);
       return`<div class="yrh"><b>${y}</b><span>${SF(p)} paid · ${SF(w)} won</span><b style="color:${SC(w-p)}">${SG(w-p)}</b></div>`+a.sort((x,z)=>z.won-x.won||z.bid-x.bid).map(l=>`<div class="yrr${/13/.test(l.team)?"":" tapp"}"${/13/.test(l.team)?"":` onclick="openT('${l.team.replace(/'/g,"\\'")}','${sel}')"`}><i></i><span>${l.team}${/13/.test(l.team)?"":` <small>(${l.seed})</small>`}</span><small>${RS[Math.min(Math.max(l.wins,0),6)]}</small><span>${SF(l.bid)}</span><span style="color:${SC(l.won-l.bid)}">${SG(l.won-l.bid)}</span></div>`).join("")}).join("")}
   // a picked bidder goes to the top, so tapping a name on All-Time lands right on their profile
-  return sel?card("Bidder profile",h3)+card("Go-to teams",h2,"tap for details")+card("Go-to seeds",h):card("Go-to seeds",h)+card("Go-to teams",h2,"tap for details")+card("Bidder profile",h3)}
+  return card("Go-to seeds",h)+card("Go-to teams",h2,"tap for details")+`<div class="note2">Bidder profiles are on All-Time Standings: tap any name there.</div>`}
 function yearRows(ys,L){return`<div class="drill">`+ys.slice().sort((a,b)=>b.y-a.y).map(t=>`<div class="yrr">${tagS(t.own,L)}<span>${t.y} · ${t.seed} seed${t.pi?" (play-in)":""}</span><small>${t.wins<0?"Lost First Four":RS[Math.min(t.wins,6)]}</small>${t.wins<0&&t.pi?`<span style="color:var(--mut)">—</span><span style="color:var(--mut)">—</span>`:`<span>${SF(t.bid)}</span><span style="color:${SC(t.won-t.bid)}">${SG(t.won-t.bid)}</span>`}</div>`).join("")+`</div>`}
 function teamHTML(D){const L=D.look,q=steam.trim().toLowerCase(),T={};D.teams.forEach(t=>{const o=T[t.team]||(T[t.team]={team:t.team,ys:[],sp:0,won:0,best:-1,titles:0,own:new Set()});o.ys.push(t);o.sp+=t.bid;o.won+=t.won;o.best=Math.max(o.best,t.wins);if(t.wins===6)o.titles++;o.own.add(t.own)});
   let A=Object.values(T).filter(o=>!q||o.team.toLowerCase().includes(q)).sort((a,b)=>(Math.round(b.won)-Math.round(b.sp))-(Math.round(a.won)-Math.round(a.sp))||b.ys.length-a.ys.length||a.team.localeCompare(b.team));
@@ -501,14 +507,15 @@ return`<div style="flex:1;min-width:300px"><div class="sub">Ranked by net (won m
 const yk=Object.keys(YEARS).sort().reverse(),side=view==="alltime"||view==="stats"||view==="home";
 $("evpick").className="evpick"+(side&&view!=="home"?" plain":"");
 $("evpick").innerHTML=view==="home"?`<span>Pick a tournament</span><span class="car3">▾</span><select aria-label="Pick a year" onchange="setYear(this.value)"><option value="" selected disabled>Pick a tournament</option>${yk.map(y=>`<option value="${y}">${y} Tournament</option>`).join("")}</select>`:side?`<span>${view==="alltime"?"All-Time Standings":"Stats &amp; Records"}</span>`:`<span>${YR} Tournament</span>${yk.length>1?`<span class="car3">▾</span><select aria-label="Pick a year" onchange="setYear(this.value)">${yk.map(y=>`<option value="${y}"${y===YR?" selected":""}>${y} Tournament</option>`).join("")}</select>`:""}`;
-$("nav").style.display=side?"none":"";
+$("nav").style.display=side&&view!=="alltime"?"none":"";
 const names=[...S.regs.map(r=>r.name),"Final Four"];if(!names.includes(tab))tab=names[0];
 $("nav").innerHTML=[["bracket","Bracket"],["standings","Standings"],["auction","Auction"],...(DATA.sched&&DATA.sched.length?[["sched","Schedule"]]:[])].map(([k,n])=>`<button class="${view===k?"on":""}" onclick="vw('${k}')">${n}</button>`).join("");
+if(view==="alltime"&&window.OSAAT)$("nav").innerHTML=OSAAT.tabs({byLabel:"By Year"}).map(([k,n])=>`<button class="${OSAAT.tab()===k?"on":""}" onclick="OSAAT.setTab('${k}')">${n}</button>`).join("");
 if($("drawer").classList.contains("on"))drawDr();
 $("tabs").style.display=view!=="bracket"?"none":"";
 $("tabs").innerHTML=names.map(n=>`<button class="tab${tab===n?" on":""}" onclick="tb(this.textContent)">${n}</button>`).join("");
 const rn=["Round of 64","Round of 32","Sweet 16","Elite 8","Region winner"];let h="";
-if(view==="home")h=homeHTML();else if(view==="alltime")h=allHTML();else if(view==="stats")h=statsHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
+if(view==="home")h=homeHTML();else if(view==="alltime")h=window.OSAAT?OSAAT.html(atCfg()):allHTML();else if(view==="stats")h=statsHTML();else if(view==="standings")h=stand();else if(view==="sched")h=sch();else if(view==="auction")h=auc();else if(tab!=="Final Four"){const r=S.regs.find(x=>x.name===tab);
 for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
@@ -558,7 +565,14 @@ function openT(team,sel){let d=document.getElementById("dsh");if(!d){d=document.
   d.querySelector(".cd").innerHTML=drillT(team,sel);d.querySelector(".cd").scrollTop=0;d.classList.add("on");document.body.style.overflow="hidden"}
 function closeT(){const d=document.getElementById("dsh");if(d)d.classList.remove("on");document.body.style.overflow=""}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeT()});
-function goBid(n){view="stats";stab="bid";sbid=n;sopen=null;render();scrollTo(0,0)}
+function goBid(n){if(window.OSAAT)OSAAT.preset("mm",n);view="alltime";render();scrollTo(0,0)}
+/* All-Time page: same layout as the golf site (shared /alltime.js) */
+function atCfg(){const D=statsData(),L=D.look;return{key:"mm",
+  years:D.yrs.map(y=>({y:y.y,pot:y.tot,champ:y.champ,champOwn:[y.champOwn]})),
+  lots:D.lots.map(l=>({y:l.y,own:l.own,team:l.team,tkey:/13/.test(l.team)?null:l.team,bid:l.bid,won:l.won})),
+  tag:n=>tagS(n,L),color:n=>L[n]?L[n].c:"#888",disp:n=>L[n]?L[n].d:n,
+  unitS:"yr",unitA:"yrs",unitP:"tournaments",unitC:"Tournament",yearLabel:y=>y+" Tournament",
+  openTeam:(t,o)=>openT(t,o),openYear:y=>setYear(y),rerender:()=>render()}}
 /* ===== hamburger menu (same layout as the golf site) ===== */
 function drawDr(){const side=view==="alltime"||view==="stats"||view==="home",yk=Object.keys(YEARS).sort().reverse();
   $("drawerCard").innerHTML=`<div class="dr-head"><b>Oak Street <span>Auctions</span></b><button onclick="dr(0)" aria-label="Close menu">✕</button></div>
