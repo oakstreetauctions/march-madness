@@ -322,7 +322,6 @@ function espnBuild(j,order){
   return{slots,sched,over,any:G.length}}
 let ESPN_YEAR=null,YR=null;
 function setYear(y,first){if(!first&&(view==="alltime"||view==="stats"||view==="home"))view="bracket";if(ESPN_YEAR){clearInterval(ESPN_YEAR);ESPN_YEAR=null}YR=y;sel=null;sday=null;swho="";if(!first)tab=null;
-  try{history.replaceState(null,"",y===Object.keys(YEARS).sort().pop()?location.pathname:"?year="+y)}catch(e){}
   const force=first&&/[?&]espn=1/.test(location.search);
   if(YEARS[y].espn||force){DATA=DATA||null;$("st").textContent="Loading from ESPN…";loadESPN(y);ESPN_YEAR=setInterval(()=>{if(document.visibilityState==="visible")loadESPN(y)},CFG.refreshSec*1000)}
   else{DATA=yearData(y);mkBid(DATA.extra);$("st").textContent=y+" auction · final results";render()}}
@@ -519,7 +518,7 @@ if(view==="home")h=homeHTML();else if(view==="alltime")h=window.OSAAT?OSAAT.html
 for(let c=0;c<4;c++){let g="";for(let i=0;i<r.lv[c].length/2;i++)g+=game(r.lv[c][2*i],r.lv[c][2*i+1],c);h+=`<div class="col"><h4>${rn[c]}</h4><div class="games">${g}</div></div>`}
 h+=`<div class="col"><h4>${rn[4]}</h4><div class="games">${one(r.lv[4][0])}</div></div>`}
 else h=`<div class="col"><h4>Semifinals</h4><div class="games">${game(...S.semi[0],4)}${game(...S.semi[1],4)}</div></div><div class="col"><h4>Championship</h4><div class="games">${game(S.fin[0],S.fin[1],5)}</div></div><div class="col"><h4>Champion</h4><div class="games">${one(S.champ)}</div></div>`;
-$("br").innerHTML=h;{const on=document.querySelector("#br .tabs .tab.on");if(on&&on.parentElement.scrollWidth>on.parentElement.clientWidth)on.parentElement.scrollLeft=on.offsetLeft-on.parentElement.clientWidth/2+on.offsetWidth/2}$("st").style.display=(view==="home"||view==="alltime"||view==="stats")?"none":""}
+$("br").innerHTML=h;syncURL();{const on=document.querySelector("#br .tabs .tab.on");if(on&&on.parentElement.scrollWidth>on.parentElement.clientWidth)on.parentElement.scrollLeft=on.offsetLeft-on.parentElement.clientWidth/2+on.offsetWidth/2}$("st").style.display=(view==="home"||view==="alltime"||view==="stats")?"none":""}
 const pick=i=>{sel=sel===i?null:i;render()},tb=n=>{tab=n;render()},vw=k=>{view=k;render();if(k==='alltime'||k==='stats'||k==='home')scrollTo(0,0)},srt=k=>{asort=k;render()},sdy=k=>{sday=k;render()},swo=v=>{swho=v;render()};
 
 
@@ -573,6 +572,24 @@ function atCfg(){const D=statsData(),L=D.look;return{key:"mm",
   tag:n=>tagS(n,L),color:n=>L[n]?L[n].c:"#888",disp:n=>L[n]?L[n].d:n,
   unitS:"yr",unitA:"yrs",unitP:"tournaments",unitC:"Tournament",yearLabel:y=>y+" Tournament",
   openTeam:(t,o)=>openT(t,o),openYear:y=>setYear(y),rerender:()=>render()}}
+
+/* ===== browser Back/Forward: each page, year, tab and picked bidder is its own history step ===== */
+let RESTORING=false,URL0=true;
+function urlFor(){const q=new URLSearchParams();
+  if(view==="home")return location.pathname;
+  if(view==="alltime"){q.set("page","alltime");if(window.OSAAT){const a=OSAAT.get("mm");if(a.tab==="grid")q.set("tab","grid");if(a.sel)q.set("bidder",a.sel);if(a.yr!=="all")q.set("yr",a.yr)}}
+  else if(view==="stats"){q.set("page","stats");if(stab&&stab!=="rec")q.set("tab",stab)}
+  else{q.set("year",YR);if(view!=="bracket")q.set("view",view)}
+  return"?"+q.toString()}
+function syncURL(){if(RESTORING)return;const u=urlFor(),cur=location.search||location.pathname;if(u===cur||(u===location.pathname&&!location.search)){URL0=false;return}
+  try{URL0?history.replaceState(null,"",u):history.pushState(null,"",u)}catch(e){}URL0=false}
+function readURL(){const q=new URLSearchParams(location.search),pg=q.get("page"),y=q.get("year");
+  if(pg==="alltime"){view="alltime";if(window.OSAAT)OSAAT.set("mm",{tab:q.get("tab"),sel:q.get("bidder"),yr:q.get("yr")})}
+  else if(pg==="stats"){view="stats";stab=q.get("tab")||"rec"}
+  else if(y&&YEARS[y]){view=q.get("view")||"bracket"}
+  else view="home";return y&&YEARS[y]?y:null}
+window.addEventListener("popstate",()=>{RESTORING=true;try{if(typeof closeT==="function")closeT();dr(0);const y=readURL(),v=view;
+  if(y&&y!==YR){setYear(y,true);view=v;tab=null}render();scrollTo(0,0)}finally{RESTORING=false}});
 /* ===== hamburger menu (same layout as the golf site) ===== */
 function drawDr(){const side=view==="alltime"||view==="stats"||view==="home",yk=Object.keys(YEARS).sort().reverse();
   $("drawerCard").innerHTML=`<div class="dr-head"><b>Oak Street <span>Auctions</span></b><button onclick="dr(0)" aria-label="Close menu">✕</button></div>
@@ -604,6 +621,6 @@ sched=Z.slice(1).map(r=>({d:gv(r,0),t:gv(r,1),net:gv(r,2),a:gv(r,3),b:gv(r,4),r:
 DATA={slots,lots,extra,sched};mkBid(extra);$("st").textContent="Live · updated "+new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});render()}
 catch(e){$("st").textContent=DATA?"Offline — showing last update":"Can't load the sheet — check the link"}}
 if(live){$("st").textContent="Loading…";load();setInterval(load,CFG.refreshSec*1000)}
-else{up=9;const q=(location.search.match(/[?&]year=(\d{4})/)||[])[1],now=new Date(),cy=String(now.getFullYear()),inWin=YEARS[cy]&&now>=new Date(cy+'-03-10')&&now<=new Date(cy+'-04-09');if(q||inWin)view='bracket';setYear(YEARS[q]?q:Object.keys(YEARS).sort().pop(),1)}
+else{up=9;const qy=readURL(),q=(location.search.match(/[?&]year=(\d{4})/)||[])[1],now=new Date(),cy=String(now.getFullYear()),inWin=YEARS[cy]&&now>=new Date(cy+'-03-10')&&now<=new Date(cy+'-04-09');if(!location.search&&inWin)view='bracket';setYear(YEARS[q]?q:Object.keys(YEARS).sort().pop(),1)}
 </script><script src="/share.js" defer></script>
 </body></html>
